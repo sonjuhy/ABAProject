@@ -1,6 +1,8 @@
 package com.example.abaproject;
 
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -40,6 +42,30 @@ public class MapJsonParsing {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static String getRegionAddress(String jsonString) throws JSONException {
+        String value = "";
+        JSONObject jObj = new JSONObject(jsonString);
+        JSONObject meta = (JSONObject) jObj.get("meta");
+        long size = (long) meta.get("total_count");
+        if(size>0){
+            JSONArray jArray = (JSONArray) jObj.get("documents");
+            JSONObject subJobj = (JSONObject) jArray.get(0);
+            JSONObject roadAddress =  (JSONObject) subJobj.get("road_address");
+            if(roadAddress == null){
+                JSONObject subsubJobj = (JSONObject) subJobj.get("address");
+                value = (String) subsubJobj.get("address_name");
+            }else{
+                value = (String) roadAddress.get("address_name");
+            }
+            if(value.equals("") || value==null){
+                subJobj = (JSONObject) jArray.get(1);
+                subJobj = (JSONObject) subJobj.get("address");
+                value =(String) subJobj.get("address_name");
+            }
+        }
+        return value;
     }
 
 }
