@@ -11,6 +11,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         XmlParsing X = new XmlParsing();
-        X.execute();
+        MapJsonParsing m = new MapJsonParsing();
+        m.mapJsonParser();;
+        //X.execute();
     }
 }
