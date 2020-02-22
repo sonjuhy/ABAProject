@@ -11,19 +11,30 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-
-public class XmlParsing extends AsyncTask<String, Void, XmlPullParser> {
+import static com.example.abaproject.MainActivity.B;
+public class XmlParsing extends AsyncTask<String, Void, String> {
     private String result = null;
     private String line = null;
+    private String BusAPIKey = "?serviceKey=8uiEDcNjEfxFOoq%2BIjRY2M7MAEKuW7AwNs9%2FyHFZUqmzm4Ci2hyvtfZdgZ7vGHBI6RjxsgBlnq%2BogcZfanSA%2Bw%3D%3D";
+    private String URL_BusLoaction = "http://openapi.changwon.go.kr/rest/bis/BusLocation/";// 노선별 정류소 정보
+    private String URL_Station = "http://openapi.changwon.go.kr/rest/bis/Station/";//정류소 정보
+    private String URL_BusRoute = "http://openapi.changwon.go.kr/rest/bis/Bus/";//노선
     private Context mContext;
     private int parserEvent = 0;
 
     @Override
-    protected XmlPullParser doInBackground(String... strings) {
+    protected void onPreExecute() {
+        super.onPreExecute();
+    }
+
+    @Override
+    protected String doInBackground(String... strings) {
         URL url;
         XmlPullParserFactory xmlPullParserFactory;
         XmlPullParser parser = null;
         String Getname = null;
+        String GetText = null;
+        BusStationList tmpB = new BusStationList();
         try{
            url = new URL("http://openapi.changwon.go.kr/rest/bis/BusLocation/?serviceKey=8uiEDcNjEfxFOoq%2BIjRY2M7MAEKuW7AwNs9%2FyHFZUqmzm4Ci2hyvtfZdgZ7vGHBI6RjxsgBlnq%2BogcZfanSA%2Bw%3D%3D&route=379001000");
             xmlPullParserFactory = XmlPullParserFactory.newInstance();
@@ -44,32 +55,28 @@ public class XmlParsing extends AsyncTask<String, Void, XmlPullParser> {
         if(parser != null){
             System.out.println("parser part + parsernum : " + parserEvent);
             while(parserEvent != XmlPullParser.END_DOCUMENT){
-                //System.out.println("paramEvent : "+parserEvent);
                 switch(parserEvent){
                     case XmlPullParser.START_TAG:
-                        System.out.println("parser.getName : " + parser.getName());
                         Getname = parser.getName();
-                        if(parser.getName().equals("ROUTE_ID")){
-                            System.out.println("get NAme: " + Getname);
-                            Getname = parser.getName();
-                        }
-                        else if(parser.getName().equals("ROUTE_NM")){
-                            Getname = parser.getName();
-                        }
                         break;
                     case XmlPullParser.TEXT:
-                        System.out.println("parser.getText : " + parser.getText());
-                        if(Getname.equals("ROUTE_ID")) {
-                            System.out.println("route_id : " + parser.getText());
-                        }
-                        else if(Getname.equals("ROUTE_NM")) {
-                            System.out.println("route_nm : " + parser.getText());
-                        }
-                        else if(Getname.equals("station_id")) {
-                            System.out.println("station_id : " + parser.getText());
-                        }
-                        else if(Getname.equals("station_id")) {
-                            System.out.println("station_nm : " + parser.getText());
+                        GetText = parser.getText();
+                        if(!(GetText.equals(""))) {
+                            if (Getname.equals("ROUTE_ID")) {
+                                System.out.println("route_id : " + GetText);
+                                tmpB.BusStation_Input_BusLocationPart(Integer.parseInt(GetText),0,0,null);
+                            } else if (Getname.equals("ROUTE_NM")) {
+                                System.out.println("route_nm : " + GetText);
+                                tmpB.BusStation_Input_BusLocationPart(0,Integer.parseInt(GetText),0,null);
+                            } else if (Getname.equals("STATION_ID")) {
+                                System.out.println("station_id : " + GetText);
+                                tmpB.BusStation_Input_BusLocationPart(0,0,Integer.parseInt(GetText),null);
+                            } else if (Getname.equals("STATION_NM")) {
+                                System.out.println("station_nm : " + GetText);
+                                tmpB.BusStation_Input_BusLocationPart(0,0,0,GetText);
+                            }
+                            Getname = "";
+                            B.add(tmpB);
                         }
                         break;
                 }
@@ -82,26 +89,11 @@ public class XmlParsing extends AsyncTask<String, Void, XmlPullParser> {
                 }
             }
         }
-        if(parser != null) {
-            return parser;
-        }
-        else{
-            return null;
-        }
+        return null;
     }
 
     @Override
-    protected void onProgressUpdate(Void... values) {
-        super.onProgressUpdate(values);
-    }
-
-    @Override
-    protected void onPostExecute(XmlPullParser parser) {
-        super.onPostExecute(parser);
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
+    protected void onPostExecute(String s) {
+        super.onPostExecute(s);
     }
 }
