@@ -6,7 +6,7 @@ public class BusStationList {
     private int StationID; //정류장번호
     private double Station_X; //정류장 X좌표
     private double Station_Y; //정류장 Y좌표
-    private String StationName; //정류장이름
+    private String StationName ; //정류장이름
     private String StationPlace; //정류장위치(동)
 
     public void BusStation_Input_BusLocationPart(int BusRouteId, int BusRouteName, int StationID, String StationName){

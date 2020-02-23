@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static com.example.abaproject.MainActivity.B;
+import static com.example.abaproject.MainActivity.busStationLists;
+
+
 public class XmlParsing extends AsyncTask<String, Void, String> {
     private String result = null;
     private String line = null;
@@ -22,10 +24,76 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
     private Context mContext;
     private int parserEvent = 0;
 
+
+    public String  WhereIsBus(String... strings){///////////////////버스 위치파악(대충 만들어봄 밑에꺼 복사해서 62라인부터 조금 다름)//// 마음에 안들면 갈아엎어도 됩니다.
+        String BusStop = null;
+
+        URL url;
+        XmlPullParserFactory xmlPullParserFactory;
+        XmlPullParser parser = null;
+        String Getname = null;
+        String GetText = null;
+        BusStationList tmpB = new BusStationList();
+        try{
+            url = new URL("http://openapi.changwon.go.kr/rest/bis/BusLocation/?serviceKey=8uiEDcNjEfxFOoq%2BIjRY2M7MAEKuW7AwNs9%2FyHFZUqmzm4Ci2hyvtfZdgZ7vGHBI6RjxsgBlnq%2BogcZfanSA%2Bw%3D%3D&route=379001000");
+            xmlPullParserFactory = XmlPullParserFactory.newInstance();
+            parser = xmlPullParserFactory.newPullParser();
+
+            parser.setInput(url.openStream(), null);
+
+            parserEvent = parser.getEventType();
+            System.out.println("Parsing start and type :" + parser.getEventType());
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        }
+        if(parser != null){
+            System.out.println("parser part + parsernum : " + parserEvent);
+            while(parserEvent != XmlPullParser.END_DOCUMENT){
+                switch(parserEvent){
+                    case XmlPullParser.START_TAG:
+                        Getname = parser.getName();
+                        break;
+                    case XmlPullParser.TEXT:
+                        GetText = parser.getText();
+                        if(!(GetText.equals(""))) {
+                            if (Getname.equals("STATION_NM")) {
+                                System.out.println("station_nm : " + GetText);
+                                BusStop = Getname;
+                            }
+                            else if (Getname.equals("EVENT_CD")) {
+                              if(Getname.equals("17"))/////////////// 정류소 17 진입 ,18진출 아무거나
+                              {
+                                  return BusStop;
+                              }
+                            }
+                            Getname = "";
+                        }
+                        break;
+                }
+                try {
+                    parserEvent = parser.next();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (XmlPullParserException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+
+
+
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
     }
+
 
     @Override
     protected String doInBackground(String... strings) {
@@ -76,7 +144,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                                 tmpB.BusStation_Input_BusLocationPart(0,0,0,GetText);
                             }
                             Getname = "";
-                            B.add(tmpB);
+                            busStationLists.add(tmpB);
                         }
                         break;
                 }
