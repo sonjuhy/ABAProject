@@ -19,7 +19,7 @@ public class BusStationList {
         if(StationID != 0){
             this.StationID = StationID;
         }
-        if(StationName.equals(null)){
+        if(StationName != null){
             this.StationName = StationName;
         }
     }

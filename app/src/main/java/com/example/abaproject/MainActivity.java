@@ -7,6 +7,7 @@ import android.os.Bundle;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+    public static BusInfo Businfo;
 
     public static ArrayList<BusStationList> busStationLists;
     public static ArrayList<AdInformationList> adInformationLists;
@@ -20,13 +21,11 @@ public class MainActivity extends AppCompatActivity {
         adInformationLists = new ArrayList<AdInformationList>();
 
 
+        Businfo = new BusInfo();
         XmlParsing X = new XmlParsing();
         MapJsonParsing m = new MapJsonParsing();
-        X.execute();
-
-
-
-
+        X.WhereIsBus();
+        //X.execute();
         //m.execute();
     }
 }
