@@ -6,6 +6,9 @@ public class BusStationList {
     private int StationID; //정류장번호
     private double Station_X; //정류장 X좌표
     private double Station_Y; //정류장 Y좌표
+
+
+
     private String StationName ; //정류장이름
     private String StationPlace; //정류장위치(동)
 
@@ -42,4 +45,9 @@ public class BusStationList {
     public String BusStation_Output_StationName(){
         return this.StationName;
     }
+    public String getStationName() {
+        return StationName;
+    }
+
+
 }
