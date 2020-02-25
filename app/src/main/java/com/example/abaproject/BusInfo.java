@@ -12,7 +12,7 @@ public class BusInfo {
         RouteID = 0;
         RouteNM = 0;
         BusNum = null;
-        B = null;
+        B = new ArrayList<>();
     }
     public void BusInfo_Input(int RouteID, int RouteNM, BusStationList B){
         if(RouteNM != 0) {

@@ -114,7 +114,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
 
         switch(strings[0]){
             case "BusLocation":
-                if(strings[1] != null){
+                if(strings.length < 1){
                     URL_String_Route = strings[1];
                 }
                 URL_String = URL_BusLoaction + BusAPIKey + "&route=" + URL_String_Route;
@@ -193,7 +193,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                         }
                         else if(case_int == 3){//BusRoute
                             if(Getname != null && Getname.equals("ROUTE_NM")){
-                                if(GetText.equals(strings[1])){
+                                if(strings.length < 1  &&GetText.equals(strings[1])){
                                     StationNM_Check = true;
                                 }
                             }

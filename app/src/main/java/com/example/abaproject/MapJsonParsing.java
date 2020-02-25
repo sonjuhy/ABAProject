@@ -28,11 +28,11 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
     private OutputStream wr;
     private InputStream inputStream;
 
-    private static String getRegionAddress(String jsonString) throws JSONException {
+    public String getRegionAddress(String jsonString) throws JSONException {
+        System.out.println("getRegionAddress is working");
         String value = "";
         JSONObject jObj = new JSONObject(jsonString);
         JSONObject meta = (JSONObject) jObj.get("meta");
-        //long size = (long) meta.get("total_count");
         Number n = (Number)meta.get("total_count");
         long size = n.longValue();
         if(size>0){
@@ -48,12 +48,22 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
             if(value.equals("") || value==null){
                 subJobj = (JSONObject) jArray.get(1);
                 subJobj = (JSONObject) subJobj.get("address");
-                value =(String) subJobj.get("address_name");
+                //value =(String) subJobj.get("address_name");
+                value =(String) subJobj.get("region_3depth_name");
             }
         }
+        System.out.println("value : " + value);
         return value;
     }
+    private void Get_BusPlace(String mJsonString){
+        try{
+            JSONObject jsonObject = new JSONObject(mJsonString);
+            JSONArray jsonArray = jsonObject.getJSONArray("documents");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
+    }
     @Override
     protected String doInBackground(String... strings) {
         String url_string = "https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?";
