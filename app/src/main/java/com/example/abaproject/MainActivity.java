@@ -3,22 +3,20 @@ package com.example.abaproject;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.util.Xml;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
     public static BusInfo Businfo;
     public static int AsyncTaskFinish = 0;
     public static ArrayList<BusStationList> busStationLists;
-    public static ArrayList<AdInformationList> adInformationLists;
+    public static ArrayList<AdList_Schedule> adList_schedules;
 
     private ProgressDialog progressDialog;
     private BackgroundThread backgroundThread;
@@ -33,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         busStationLists = new ArrayList<BusStationList>();
-        adInformationLists = new ArrayList<AdInformationList>();
+        adList_schedules = new ArrayList<AdList_Schedule>();
 
 
         Businfo = new BusInfo();
@@ -68,6 +66,20 @@ public class MainActivity extends AppCompatActivity {
         for(int i=0;i<Businfo.BusInfo_Output_BusStationList().size();i++){
 
 
+        Intent intent = new Intent(this,SubActivity.class);
+        intent.putExtra("adList_schedules", adList_schedules);
+        intent.putExtra("busStationLists", busStationLists);
+
+
+        /*for(int i=0;i<Businfo.BusInfo_Output_BusStationList().size();i++){
+            /*
+            * private int BusRouteID; //버스노선아이디
+    private int BusRouteName; //버스노선번호
+    private int StationID; //정류장번호
+    private double Station_X; //정류장 X좌표
+    private double Station_Y; //정류장 Y좌표
+
+
             System.out.println("Station Name : "+Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationName());
             System.out.println("Station ID : "+Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID());
             System.out.println("Station X : "+Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationX());
@@ -75,6 +87,15 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Station Place : "+Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationPlace());
         }
     }
+
+
+
+
+
+
+
+
+
     private class BackgroundThread extends Thread{
         volatile boolean running = false;
         int cnt;
@@ -125,10 +146,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
 
         }
-        private boolean Station_Load(){
+        private boolean Station_Load(int i){
             xmlParsing = new XmlParsing();
-            //System.out.println("Station Load : " + i + "Integer info : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID());
-            xmlParsing.execute("Station");
+            xmlParsing.execute("Station", Integer.toString(Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID()));
             while (true) {
                 if (xmlParsing.finish == true) {
                     break;
