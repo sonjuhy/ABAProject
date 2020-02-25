@@ -39,20 +39,20 @@ public class MainActivity extends AppCompatActivity {
         MapJsonParsing m = new MapJsonParsing();
         String test = "well...";
 
-        System.out.println("MainActivity : "+test);
+        System.out.println("MainActivity : " + test);
         //여기 밑에 두곳을 원하는 노선번호 고치면 한번에 다 처리됨
-        Businfo.BusInfo_Input(0,100,null);
+        Businfo.BusInfo_Input(0, 100, null);
         RouteNM = "100";
 
         progressDialog = ProgressDialog.show(
-                MainActivity.this, "Loading...","Wait Please,,,");
+                MainActivity.this, "Loading...", "Wait Please,,,");
         backgroundThread = new BackgroundThread();
         backgroundThread.setRunning(true);
         backgroundThread.start();
 
-        Log.v("thread test","background end");
-        while(true){
-            if(threadcheck == true){
+        Log.v("thread test", "background end");
+        while (true) {
+            if (threadcheck == true) {
                 try {
                     Thread.sleep(1500);
                 } catch (InterruptedException e) {
@@ -61,40 +61,20 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }
-        System.out.println("Route Name : "+Businfo.BusInfo_Output_RouteNM());
-        System.out.println("Route ID : "+Businfo.BusInfo_Output_RouteID());
-        for(int i=0;i<Businfo.BusInfo_Output_BusStationList().size();i++){
-
-
-        Intent intent = new Intent(this,SubActivity.class);
+        Intent intent = new Intent(this, SubActivity.class);
         intent.putExtra("adList_schedules", adList_schedules);
         intent.putExtra("busStationLists", busStationLists);
 
-
-        /*for(int i=0;i<Businfo.BusInfo_Output_BusStationList().size();i++){
-            /*
-            * private int BusRouteID; //버스노선아이디
-    private int BusRouteName; //버스노선번호
-    private int StationID; //정류장번호
-    private double Station_X; //정류장 X좌표
-    private double Station_Y; //정류장 Y좌표
-
-
-            System.out.println("Station Name : "+Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationName());
-            System.out.println("Station ID : "+Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID());
-            System.out.println("Station X : "+Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationX());
-            System.out.println("Station Y : "+Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationY());
-            System.out.println("Station Place : "+Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationPlace());
+        System.out.println("Route Name : " + Businfo.BusInfo_Output_RouteNM());
+        System.out.println("Route ID : " + Businfo.BusInfo_Output_RouteID());
+        for (int i = 0; i < Businfo.BusInfo_Output_BusStationList().size(); i++) {
+            System.out.println("Station Name : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationName());
+            System.out.println("Station ID : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID());
+            System.out.println("Station X : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationX());
+            System.out.println("Station Y : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationY());
+            System.out.println("Station Place : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationPlace());
         }
     }
-
-
-
-
-
-
-
-
 
     private class BackgroundThread extends Thread{
         volatile boolean running = false;
@@ -146,9 +126,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
 
         }
-        private boolean Station_Load(int i){
+        private boolean Station_Load(){
             xmlParsing = new XmlParsing();
-            xmlParsing.execute("Station", Integer.toString(Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID()));
+            xmlParsing.execute("Station");
             while (true) {
                 if (xmlParsing.finish == true) {
                     break;
