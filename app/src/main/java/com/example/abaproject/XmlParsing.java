@@ -28,6 +28,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
     private String URL_Station = "http://openapi.changwon.go.kr/rest/bis/Station/";//정류소 정보
     private String URL_BusRoute = "http://openapi.changwon.go.kr/rest/bis/Bus/";//노선
     private int parserEvent = 0;
+    private String busStop = "";
     public boolean finish = false;
 
     @Override
@@ -154,11 +155,14 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                         else if (case_int == 4) {
                             if (Getname != null && Getname.equals("ARRV_STATION_ID")) {
                                 System.out.println("ARRV_STATION_ID : " + GetText);
+                                busStop = GetText;
+
                             } else if (Getname != null && Getname.equals("PLATE_NO")) {
                                System.out.println("PLATE_NO : " + GetText);
                                if (GetText.equals(strings[2])) {
                                    AsyncTaskFinish =1;
-                                }
+                                   return busStop;
+                               }
                             }
                         }
                         Getname = "";

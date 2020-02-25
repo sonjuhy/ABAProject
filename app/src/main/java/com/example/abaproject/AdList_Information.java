@@ -2,7 +2,7 @@ package com.example.abaproject;
 
 import java.util.ArrayList;
 ///////////////서버 광고정보 저장
-public class AdInformationList {
+public class AdList_Information {
 
     private String Advertisingpath; //동영상 경로
     private int MaximumPlays; //최대재생횟수
@@ -23,8 +23,8 @@ public class AdInformationList {
     public ArrayList<Integer> getTime() {
         return time;
     }
-    public ArrayList<String> getStationPlace() {
-        return StationPlace;
-    }
+}
+
+class AdList_Information_Network{
 
 }
