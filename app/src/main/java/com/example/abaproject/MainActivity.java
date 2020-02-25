@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -29,8 +31,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        busStationLists = new ArrayList<BusStationList>();
         adList_schedules = new ArrayList<AdList_Schedule>();
 
 
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         //여기 밑에 두곳을 원하는 노선번호 고치면 한번에 다 처리됨
         Businfo.BusInfo_Input(0, 100, null);
         RouteNM = "100";
-
+/*
         progressDialog = ProgressDialog.show(
                 MainActivity.this, "Loading...", "Wait Please,,,");
         backgroundThread = new BackgroundThread();
@@ -61,9 +61,23 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }
-        Intent intent = new Intent(this, SubActivity.class);
-        intent.putExtra("adList_schedules", adList_schedules);
-        intent.putExtra("busStationLists", busStationLists);
+
+ */
+
+
+        final Intent intent = new Intent(this, SubActivity.class);
+        Button button1 = (Button) findViewById(R.id.button);
+        button1.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO : click event
+
+                intent.putExtra("adList_schedules", adList_schedules);
+                intent.putExtra("Businfo", Businfo);
+                startActivity(intent);
+            }
+        });
+
 
         System.out.println("Route Name : " + Businfo.BusInfo_Output_RouteNM());
         System.out.println("Route ID : " + Businfo.BusInfo_Output_RouteID());
@@ -76,10 +90,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class BackgroundThread extends Thread{
+    private class BackgroundThread extends Thread {
         volatile boolean running = false;
         int cnt;
-        void setRunning(boolean b){
+
+        void setRunning(boolean b) {
             running = b;
             cnt = 10;
         }
@@ -97,13 +112,14 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Station Place End");
             System.out.println("thread test");
             threadcheck = true;
-            while(running){
-                if(threadcheck == true)
+            while (running) {
+                if (threadcheck == true)
                     running = false;
                 handler.sendMessage(handler.obtainMessage());
             }
         }
-        private boolean BusRoute_Load(String RouteNM){
+
+        private boolean BusRoute_Load(String RouteNM) {
             xmlParsing = new XmlParsing();
             System.out.println("BusRoute : " + RouteNM);
             xmlParsing.execute("BusRoute", RouteNM);
@@ -114,7 +130,8 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         }
-        private boolean BusLocation_Load(){
+
+        private boolean BusLocation_Load() {
             xmlParsing = new XmlParsing();
             System.out.println("BusLocation part");
             xmlParsing.execute("BusLocation", Integer.toString(Businfo.BusInfo_Output_RouteID()));
@@ -126,7 +143,8 @@ public class MainActivity extends AppCompatActivity {
             return true;
 
         }
-        private boolean Station_Load(){
+
+        private boolean Station_Load() {
             xmlParsing = new XmlParsing();
             xmlParsing.execute("Station");
             while (true) {
@@ -136,36 +154,38 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         }
-        private void StationPlace_Load(){
-            for(int i=0; i<Businfo.BusInfo_Output_BusStationList().size(); i++){
+
+        private void StationPlace_Load() {
+            for (int i = 0; i < Businfo.BusInfo_Output_BusStationList().size(); i++) {
                 mapJsonParsing = new MapJsonParsing();
                 mapJsonParsing.execute(
                         Double.toString(Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationX()),
                         Double.toString(Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationY()),
                         Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationName(), Integer.toString(i));
             }
-            while(true){
-                if(mapJsonParsing.finish == true){
+            while (true) {
+                if (mapJsonParsing.finish == true) {
                     break;
                 }
             }
         }
     }
-    Handler handler = new Handler(){
+
+    Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             progressDialog.dismiss();
 
             boolean retry = true;
-            while(retry){
+            while (retry) {
                 try {
                     backgroundThread.join();
                     retry = false;
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                Toast.makeText(MainActivity.this,"Finish",Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Finish", Toast.LENGTH_LONG).show();
             }
         }
     };

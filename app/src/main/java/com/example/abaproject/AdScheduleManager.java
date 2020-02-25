@@ -7,7 +7,15 @@ public class AdScheduleManager {
 
 
 
-    //public void
+    public void test(BusInfo busInfo,ArrayList<AdList_Schedule> adList_schedule)
+    {
+
+
+
+
+
+
+    }
 
 
 

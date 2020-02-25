@@ -17,6 +17,7 @@ import static com.example.abaproject.MainActivity.AsyncTaskFinish;
 * 사용법
 * string[0] : 받을 api 주소
 * string[1] : BusLocation : Route 값, Station : Station 값, BusPosition : Route 값, BusRoute : 노선번호 값
+* string[2] : 차량번호
 * 순서 : BusRoute -> BusLocation -> Station
 * */
 public class XmlParsing extends AsyncTask<String, Void, String> {

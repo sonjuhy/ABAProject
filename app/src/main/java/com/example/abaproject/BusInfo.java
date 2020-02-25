@@ -1,8 +1,9 @@
 package com.example.abaproject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class BusInfo {
+public class BusInfo implements Serializable {
     private int RouteID;
     private int RouteNM;
     private String BusNum;
