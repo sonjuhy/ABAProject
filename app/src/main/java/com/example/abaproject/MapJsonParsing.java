@@ -28,7 +28,7 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
     private OutputStream wr;
     private InputStream inputStream;
 
-    public String getRegionAddress(String jsonString) throws JSONException {
+    private static String getRegionAddress(String jsonString) throws JSONException {
         System.out.println("getRegionAddress is working");
         String value = "";
         JSONObject jObj = new JSONObject(jsonString);
@@ -59,13 +59,20 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
         try{
             JSONObject jsonObject = new JSONObject(mJsonString);
             JSONArray jsonArray = jsonObject.getJSONArray("documents");
+            for(int i = 0;i <jsonArray.length(); i++){
+                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
+
+                if("B".equals(jsonObject1.getString("region_type"))){
+                    System.out.println("region 3" + jsonObject1.getString("region_3depth_name"));
+                }
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
     }
     @Override
-    protected String doInBackground(String... strings) {
+    protected String doInBackground(String... strings) {//string0 = x, string1 = y, string2 = station name
         String url_string = "https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?";
         //String location = "query="+strings[0];
         String x, y;
@@ -74,7 +81,6 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
 
         try {
             this.url = new URL(url_string+x+"&"+y);
-            System.out.println("url string : "+url_string+x+"&"+y);
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setConnectTimeout(15000);
@@ -125,10 +131,6 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        try {
-            getRegionAddress(s);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        Get_BusPlace(s);
     }
 }
