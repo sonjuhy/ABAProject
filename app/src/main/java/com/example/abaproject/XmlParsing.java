@@ -1,6 +1,5 @@
 package com.example.abaproject;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -16,9 +15,11 @@ import static com.example.abaproject.MainActivity.Businfo;
 import static com.example.abaproject.MainActivity.AsyncTaskFinish;
 /*
 * 사용법
-* string[0] :
+* string[0] : 받을 api 주소
+* string[1] : BusLocation : Route 값, Station : Station 값, BusPosition : Route 값, BusRoute : 노선번호 값
+* 순서 : BusRoute -> BusLocation -> Station
 * */
-public class XmlParsing extends AsyncTask<String, Void, String> {
+public class XmlParsing extends AsyncTask<String, Void, Boolean> {
     private String result = null;
     private String line = null;
     private String BusAPIKey = "?serviceKey=8uiEDcNjEfxFOoq%2BIjRY2M7MAEKuW7AwNs9%2FyHFZUqmzm4Ci2hyvtfZdgZ7vGHBI6RjxsgBlnq%2BogcZfanSA%2Bw%3D%3D";
@@ -26,8 +27,8 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
     private String URL_BusPosition = "http://openapi.changwon.go.kr/rest/bis/BusPosition/";// 노선별 버스 위치 정보
     private String URL_Station = "http://openapi.changwon.go.kr/rest/bis/Station/";//정류소 정보
     private String URL_BusRoute = "http://openapi.changwon.go.kr/rest/bis/Bus/";//노선
-    private Context mContext;
     private int parserEvent = 0;
+    public boolean finish = false;
 
     @Override
     protected void onPreExecute() {
@@ -35,7 +36,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
     }
 
     @Override
-    protected String doInBackground(String... strings) {
+    protected Boolean doInBackground(String... strings) {
         URL url;
         XmlPullParserFactory xmlPullParserFactory;
         XmlPullParser parser = null;
@@ -45,9 +46,9 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
         String Getname = null;
         String GetText = null;
         BusStationList tmpB;
+        String tmp_RouteID = null, tmp_RouteNM = null;
         int case_int = 0;
         double StationX = 0.0, StationY = 0.0;
-        boolean StationNM_Check = false;
 
         switch(strings[0]){
             case "BusLocation":
@@ -83,7 +84,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
             parser.setInput(url.openStream(), null);
 
             parserEvent = parser.getEventType();
-            System.out.println("Parsing start and type :" + parser.getEventType());
+           // System.out.println("Parsing start and type :" + parser.getEventType());
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -94,7 +95,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
         }
         tmpB = new BusStationList();
         if(parser != null){
-            System.out.println("parser part + parsernum : " + parserEvent);
+            //System.out.println("parser part + parsernum : " + parserEvent);
             while(parserEvent != XmlPullParser.END_DOCUMENT){
                 switch(parserEvent){
                     case XmlPullParser.START_TAG:
@@ -105,29 +106,30 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                         if(case_int == 1) {//BusLocation
                             if (GetText != null && !(GetText.equals(""))) {
                                 if (Getname != null && Getname.equals("ROUTE_ID")) {
-                                    System.out.println("route_id : " + GetText);
+                                    //System.out.println("route_id : " + GetText);
                                     tmpB.BusStation_Input_BusLocationPart(Integer.parseInt(GetText), 0, 0, null);
                                 } else if (Getname != null && Getname.equals("ROUTE_NM")) {
-                                    System.out.println("route_nm : " + GetText);
+                                    //System.out.println("route_nm : " + GetText);
                                     tmpB.BusStation_Input_BusLocationPart(0, Integer.parseInt(GetText), 0, null);
                                 } else if (Getname != null && Getname.equals("STATION_ID")) {
-                                    System.out.println("station_id : " + GetText);
+                                    //System.out.println("station_id : " + GetText);
                                     tmpB.BusStation_Input_BusLocationPart(0, 0, Integer.parseInt(GetText), null);
                                 } else if (Getname != null && Getname.equals("STATION_NM")) {
-                                    System.out.println("station_nm : " + GetText);
+                                    //System.out.println("station_nm : " + GetText);
                                     tmpB.BusStation_Input_BusLocationPart(0, 0, 0, GetText);
                                     Businfo.BusInfo_Input(0,0,tmpB);
                                     tmpB = new BusStationList();
                                 }
-                                Getname = "";
                             }
                         }
                         else if(case_int == 2){//Station
                             if(Getname != null && Getname.equals("LOCAL_X")){
                                 StationX = Double.parseDouble(GetText);
+                                System.out.println("Station X : " + GetText);
                             }
                             if(Getname != null && Getname.equals("LOCAL_Y")){
                                 StationY = Double.parseDouble(GetText);
+                                System.out.println("Station y : " + GetText);
                                 int stationnm = Integer.parseInt(strings[1]);
                                 for(int i=0;i<Businfo.BusInfo_Output_BusStationList().size();i++){
                                     if(Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID() == stationnm){
@@ -137,17 +139,20 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                             }
                         }
                         else if(case_int == 3){//BusRoute
-                            if(Getname != null && Getname.equals("ROUTE_NM")){
-                                if(strings.length > 1  && GetText.equals(strings[1])){
-                                    StationNM_Check = true;
+
+                            if(Getname != null && Getname.equals("ROUTE_ID")){
+                                tmp_RouteID = GetText;
+                                //System.out.println("Route id : " + tmp_RouteID);
+                            }
+                            if(Getname != null && Getname.equals("ROUTE_NM")/* && StationNM_Check == true*/){
+                                tmp_RouteNM = GetText;
+                                //System.out.println("Route ID : " + tmp_RouteID + " Route_NM : " + tmp_RouteNM);
+                                if(tmp_RouteNM != null && tmp_RouteNM.equals(strings[1])) {
+                                    System.out.println("Route NM : " + tmp_RouteID + " string[1] : " + strings[1]);
+                                    Businfo.BusInfo_Input(Integer.parseInt(tmp_RouteID), Integer.parseInt(strings[1]), null);
                                 }
                             }
-                            if(Getname != null && Getname.equals("ROUTE_ID") && StationNM_Check == true){
-                                StationNM_Check = false;
-                                Businfo.BusInfo_Input(Integer.parseInt(GetText), Integer.parseInt(strings[0]), null);
-                            }
                         }
-
                         else if (case_int == 4) {
                             if (Getname != null && Getname.equals("ARRV_STATION_ID")) {
                                 System.out.println("ARRV_STATION_ID : " + GetText);
@@ -158,7 +163,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                                 }
                             }
                         }
-
+                        Getname = "";
                         break;
                 }
                 try {
@@ -170,19 +175,8 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                 }
             }
         }
-        return null;
-    }
-
-    @Override
-    protected void onPostExecute(String s) {
-        super.onPostExecute(s);
-        ArrayList<BusStationList> tmp = Businfo.BusInfo_Output_BusStationList();
-        /*for(int i=0 ;i< tmp.size(); i++){
-            System.out.println("Count : "+ i);
-            System.out.println("Route ID : "+tmp.get(i).BusStation_Output_BusRouteID());
-            System.out.println("Route NM : "+tmp.get(i).BusStation_Output_BusRouteName());
-            System.out.println("Station ID : "+tmp.get(i).BusStation_Output_StationID());
-            System.out.println("Station NM : "+tmp.get(i).BusStation_Output_StationName());
-        }*/
+        this.finish = true;
+        AsyncTaskFinish = 1;
+        return true;
     }
 }

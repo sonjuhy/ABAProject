@@ -12,14 +12,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLEncoder;
 
-import javax.net.ssl.HttpsURLConnection;
+import static com.example.abaproject.MainActivity.Businfo;
 
 public class MapJsonParsing extends AsyncTask<String, Void, String> {
     private String apikey = "539c81f10377d160a0e0235df1e66207";
@@ -27,6 +24,7 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
     private HttpURLConnection httpURLConnection;
     private OutputStream wr;
     private InputStream inputStream;
+    private String StationName;
 
     private static String getRegionAddress(String jsonString) throws JSONException {
         System.out.println("getRegionAddress is working");
@@ -63,7 +61,13 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
                 JSONObject jsonObject1 = jsonArray.getJSONObject(i);
 
                 if("B".equals(jsonObject1.getString("region_type"))){
-                    System.out.println("region 3" + jsonObject1.getString("region_3depth_name"));
+                    StationName = jsonObject1.getString("region_3depth_name");
+                    System.out.println("region 3" + StationName);
+                    for(int j = 0; j < Businfo.BusInfo_Output_BusStationList().size(); j++){
+                        if(Businfo.BusInfo_Output_BusStationList().get(j).BusStation_Output_StationName().equals(StationName)){
+                            Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Input_KakaoPart(StationName);
+                        }
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -78,7 +82,7 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
         String x, y;
         x = "x=128.6999664";
         y = "y=35.22329942";
-
+        StationName = strings[2];
         try {
             this.url = new URL(url_string+x+"&"+y);
             httpURLConnection = (HttpURLConnection) url.openConnection();
