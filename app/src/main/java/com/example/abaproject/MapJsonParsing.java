@@ -24,7 +24,9 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
     private HttpURLConnection httpURLConnection;
     private OutputStream wr;
     private InputStream inputStream;
-    private String StationName;
+    private String StationPlace;
+
+    public boolean finish = false;
 
     private static String getRegionAddress(String jsonString) throws JSONException {
         System.out.println("getRegionAddress is working");
@@ -53,7 +55,7 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
         System.out.println("value : " + value);
         return value;
     }
-    private void Get_BusPlace(String mJsonString){
+    private void Get_BusPlace(String mJsonString, String count){
         try{
             JSONObject jsonObject = new JSONObject(mJsonString);
             JSONArray jsonArray = jsonObject.getJSONArray("documents");
@@ -61,28 +63,25 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
                 JSONObject jsonObject1 = jsonArray.getJSONObject(i);
 
                 if("B".equals(jsonObject1.getString("region_type"))){
-                    StationName = jsonObject1.getString("region_3depth_name");
-                    System.out.println("region 3" + StationName);
-                    for(int j = 0; j < Businfo.BusInfo_Output_BusStationList().size(); j++){
-                        if(Businfo.BusInfo_Output_BusStationList().get(j).BusStation_Output_StationName().equals(StationName)){
-                            Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Input_KakaoPart(StationName);
-                        }
-                    }
+                    StationPlace = jsonObject1.getString("region_3depth_name");
+                    //System.out.println("region 3 : " + StationPlace);
+                    Businfo.BusInfo_Output_BusStationList().get(Integer.parseInt(count)).BusStation_Input_KakaoPart(StationPlace);
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
+        finish = true;
     }
     @Override
-    protected String doInBackground(String... strings) {//string0 = x, string1 = y, string2 = station name
+    protected String doInBackground(String... strings) {//string0 = x, string1 = y, string3 = count
         String url_string = "https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?";
-        //String location = "query="+strings[0];
         String x, y;
-        x = "x=128.6999664";
-        y = "y=35.22329942";
-        StationName = strings[2];
+        //x = "x=128.6999664";
+        //y = "y=35.22329942";
+        x = "x=" + strings[0];
+        y = "y=" + strings[1];
+        //System.out.println("x : " + x + "y : " + y);
         try {
             this.url = new URL(url_string+x+"&"+y);
             httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -102,11 +101,11 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
 
             if(responseStatusCode == HttpURLConnection.HTTP_OK){
                 inputStream = httpURLConnection.getInputStream();
-                System.out.println("Response OK");
+                //System.out.println("Response OK");
             }
             else{
                 inputStream = httpURLConnection.getErrorStream();
-                System.out.println("Response Failed");
+                //System.out.println("Response Failed");
             }
 
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream,"UTF-8");
@@ -118,8 +117,9 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
                 stringBuilder.append(line);
             }
             httpURLConnection.disconnect();
-            System.out.println("here : "+stringBuilder.toString());
+            //System.out.println("here : "+stringBuilder.toString());
 
+            Get_BusPlace(stringBuilder.toString(), strings[3]);
             return stringBuilder.toString();
 
         } catch (ProtocolException e) {
@@ -135,6 +135,6 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        Get_BusPlace(s);
+        //Get_BusPlace(s);
     }
 }

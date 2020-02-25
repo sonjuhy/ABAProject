@@ -19,7 +19,7 @@ import static com.example.abaproject.MainActivity.AsyncTaskFinish;
 * string[1] : BusLocation : Route 값, Station : Station 값, BusPosition : Route 값, BusRoute : 노선번호 값
 * 순서 : BusRoute -> BusLocation -> Station
 * */
-public class XmlParsing extends AsyncTask<String, Void, Boolean> {
+public class XmlParsing extends AsyncTask<String, Void, String> {
     private String result = null;
     private String line = null;
     private String BusAPIKey = "?serviceKey=8uiEDcNjEfxFOoq%2BIjRY2M7MAEKuW7AwNs9%2FyHFZUqmzm4Ci2hyvtfZdgZ7vGHBI6RjxsgBlnq%2BogcZfanSA%2Bw%3D%3D";
@@ -36,19 +36,20 @@ public class XmlParsing extends AsyncTask<String, Void, Boolean> {
     }
 
     @Override
-    protected Boolean doInBackground(String... strings) {
+    protected String doInBackground(String... strings) {
         URL url;
         XmlPullParserFactory xmlPullParserFactory;
         XmlPullParser parser = null;
         String URL_String;
         String URL_String_Route = "379001000"; //기본값 100번 노선
-        String URL_String_Station = null;
         String Getname = null;
         String GetText = null;
         BusStationList tmpB;
-        String tmp_RouteID = null, tmp_RouteNM = null;
+        String tmp_RouteID = null, tmp_RouteNM = null, tmp_StationID = null;
+        boolean StationID_check = false;
         int case_int = 0;
         double StationX = 0.0, StationY = 0.0;
+        ArrayList<AllStation> as = new ArrayList<>();
 
         switch(strings[0]){
             case "BusLocation":
@@ -59,10 +60,8 @@ public class XmlParsing extends AsyncTask<String, Void, Boolean> {
                 case_int = 1;
             break;
             case "Station":
-                if(strings.length > 1) {
-                    URL_String_Station = strings[1];
-                }
-                URL_String = URL_Station + URL_String_Station + BusAPIKey;
+                URL_String = URL_Station + BusAPIKey;
+                System.out.println("URL_String : " + URL_String);
                 case_int = 2;
                 break;
             case "BusRoute":
@@ -123,23 +122,22 @@ public class XmlParsing extends AsyncTask<String, Void, Boolean> {
                             }
                         }
                         else if(case_int == 2){//Station
+                            //System.out.println("strings[1]" + strings[1]);
+                            if(Getname != null && "STATION_ID".equals(Getname)){
+                                tmp_StationID = GetText;
+                            }
                             if(Getname != null && Getname.equals("LOCAL_X")){
                                 StationX = Double.parseDouble(GetText);
-                                System.out.println("Station X : " + GetText);
                             }
                             if(Getname != null && Getname.equals("LOCAL_Y")){
                                 StationY = Double.parseDouble(GetText);
-                                System.out.println("Station y : " + GetText);
-                                int stationnm = Integer.parseInt(strings[1]);
-                                for(int i=0;i<Businfo.BusInfo_Output_BusStationList().size();i++){
-                                    if(Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID() == stationnm){
-                                        Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Input_StationPart(StationX,StationY);
-                                    }
-                                }
+
+                                AllStation astmp = new AllStation();
+                                astmp.AllStation_Input(StationX, StationY, tmp_StationID);
+                                as.add(astmp);
                             }
                         }
                         else if(case_int == 3){//BusRoute
-
                             if(Getname != null && Getname.equals("ROUTE_ID")){
                                 tmp_RouteID = GetText;
                                 //System.out.println("Route id : " + tmp_RouteID);
@@ -174,9 +172,21 @@ public class XmlParsing extends AsyncTask<String, Void, Boolean> {
                     e.printStackTrace();
                 }
             }
+            if(case_int == 2){
+                int stationnm = 0;
+                for(int j=0; j< as.size(); j++) {
+                    stationnm = Integer.parseInt(as.get(j).AllStation_Output_StationID());
+                    for (int i = 0; i < Businfo.BusInfo_Output_BusStationList().size(); i++) {
+                        if (Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID() == stationnm) {
+                            Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Input_StationPart(as.get(j).AllStation_Output_X(), as.get(j).AllStation_Output_Y());
+                        }
+                    }
+                }
+                as = null;
+            }
         }
         this.finish = true;
         AsyncTaskFinish = 1;
-        return true;
+        return null;
     }
 }

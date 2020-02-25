@@ -52,6 +52,29 @@ public class BusStationList {
     public String BusStation_Output_StationPlace(){
         return this.StationPlace;
     }
+}
+class AllStation{
+    private double X;
+    private double Y;
+    private String StationID;
 
-
+    AllStation(){
+        X = 0.0;
+        Y = 0.0;
+        StationID = null;
+    }
+    public void AllStation_Input(double X, double Y, String StationID){
+        this.X = X;
+        this.Y = Y;
+        this.StationID = StationID;
+    }
+    public double AllStation_Output_X(){
+        return this.X;
+    }
+    public double AllStation_Output_Y(){
+        return this.Y;
+    }
+    public String AllStation_Output_StationID(){
+        return this.StationID;
+    }
 }
