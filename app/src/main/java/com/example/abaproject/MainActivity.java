@@ -28,12 +28,12 @@ public class MainActivity extends AppCompatActivity {
         XmlParsing X = new XmlParsing();
         MapJsonParsing m = new MapJsonParsing();
         String test = "well...";
-        //X.execute("BusLocation");
+       // X.execute("BusLocation");
 
         System.out.println("MainActivity : "+test);
 
         try {
-            System.out.println(X.execute("BusPosition","379001000","경남71자1155").get()+"\n\n\n\n\n");/////////// 차량번호 예시 : 경남71자4015
+            System.out.println(X.execute("BusPosition","379001000","경남71자1142").get());/////////// 차량번호 예시 : 경남71자4015
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }
+
+
         System.out.println("MainActivity : " + test);
     }
 }
