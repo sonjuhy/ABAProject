@@ -1,13 +1,14 @@
 package com.example.abaproject;
 
 
-import static com.example.abaproject.MainActivity.adInformationLists;
-
+import java.util.ArrayList;
 
 public class AdScheduleManager {
 
 
-    
+
+    //public void
+
 
 
 

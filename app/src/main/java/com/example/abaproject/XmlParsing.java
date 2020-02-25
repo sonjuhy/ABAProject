@@ -19,7 +19,7 @@ import static com.example.abaproject.MainActivity.AsyncTaskFinish;
 * string[1] : BusLocation : Route 값, Station : Station 값, BusPosition : Route 값, BusRoute : 노선번호 값
 * 순서 : BusRoute -> BusLocation -> Station
 * */
-public class XmlParsing extends AsyncTask<String, Void, Boolean> {
+public class XmlParsing extends AsyncTask<String, Void, String> {
     private String result = null;
     private String line = null;
     private String BusAPIKey = "?serviceKey=8uiEDcNjEfxFOoq%2BIjRY2M7MAEKuW7AwNs9%2FyHFZUqmzm4Ci2hyvtfZdgZ7vGHBI6RjxsgBlnq%2BogcZfanSA%2Bw%3D%3D";
@@ -28,6 +28,7 @@ public class XmlParsing extends AsyncTask<String, Void, Boolean> {
     private String URL_Station = "http://openapi.changwon.go.kr/rest/bis/Station/";//정류소 정보
     private String URL_BusRoute = "http://openapi.changwon.go.kr/rest/bis/Bus/";//노선
     private int parserEvent = 0;
+    private String busStop = "";
     public boolean finish = false;
 
     @Override
@@ -36,7 +37,7 @@ public class XmlParsing extends AsyncTask<String, Void, Boolean> {
     }
 
     @Override
-    protected Boolean doInBackground(String... strings) {
+    protected String doInBackground(String... strings) {
         URL url;
         XmlPullParserFactory xmlPullParserFactory;
         XmlPullParser parser = null;
@@ -156,11 +157,14 @@ public class XmlParsing extends AsyncTask<String, Void, Boolean> {
                         else if (case_int == 4) {
                             if (Getname != null && Getname.equals("ARRV_STATION_ID")) {
                                 System.out.println("ARRV_STATION_ID : " + GetText);
+                                busStop = GetText;
+
                             } else if (Getname != null && Getname.equals("PLATE_NO")) {
                                System.out.println("PLATE_NO : " + GetText);
                                if (GetText.equals(strings[2])) {
                                    AsyncTaskFinish =1;
-                                }
+                                   return busStop;
+                               }
                             }
                         }
                         Getname = "";
@@ -177,6 +181,6 @@ public class XmlParsing extends AsyncTask<String, Void, Boolean> {
         }
         this.finish = true;
         AsyncTaskFinish = 1;
-        return true;
+        return null;
     }
 }
