@@ -43,7 +43,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
         XmlPullParserFactory xmlPullParserFactory;
         XmlPullParser parser = null;
         String URL_String;
-        String URL_String_Route = "379001000"; //기본값 100번 노선
+        String URL_String_Route = "379000100"; //기본값 100번 노선
         String Getname = null;
         String GetText = null;
         BusStationList tmpB;

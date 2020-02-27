@@ -8,10 +8,23 @@ import java.util.ArrayList;
 
 public class AdList_Schedule implements Parcelable {
 
+
     private String StationPlace; //재생위치위치(동)
+
+
+
     private int[] time = new int[3];
+
+
+
     private  ArrayList<AdList_Information> adList_informations_0 = new ArrayList<AdList_Information>();
+
+
+
     private  ArrayList<AdList_Information> adList_informations_1 = new ArrayList<AdList_Information>();
+
+
+
     private  ArrayList<AdList_Information> adList_informations_2 = new ArrayList<AdList_Information>();
 
     protected AdList_Schedule(Parcel in) {
@@ -41,4 +54,25 @@ public class AdList_Schedule implements Parcelable {
         parcel.writeString(StationPlace);
         parcel.writeIntArray(time);
     }
+    public String getStationPlace() {
+        return StationPlace;
+    }
+
+    public int[] getTime() {
+        return time;
+    }
+
+    public ArrayList<AdList_Information> getAdList_informations_0() {
+        return adList_informations_0;
+    }
+
+    public ArrayList<AdList_Information> getAdList_informations_1() {
+        return adList_informations_1;
+    }
+
+    public ArrayList<AdList_Information> getAdList_informations_2() {
+        return adList_informations_2;
+    }
+
+
 }

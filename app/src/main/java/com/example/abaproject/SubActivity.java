@@ -21,13 +21,13 @@ public class SubActivity extends AppCompatActivity {
     private XmlParsing xmlParsing;
     private String busStop;
     private AdScheduleManager adScheduleManager = new AdScheduleManager();
-    private String station_name =null;
-
+    private String station_place =null;
+    private int adList_num =-1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         Intent intent =getIntent();
 
         final BusInfo busInfo = (BusInfo) intent.getSerializableExtra("Businfo");
@@ -42,12 +42,12 @@ public class SubActivity extends AppCompatActivity {
             public void run() {
                 // 반복실행할 구문
                 try {
-                    busStop =new XmlParsing().execute("BusPosition","379000100","경남71자1078").get();
+                    busStop =new XmlParsing().execute("BusPosition","379000100","경남71자1084").get();
 
                     if(AsyncTaskFinish !=0)
                     {
                         System.out.println(busStop);
-                        test(busInfo, adList_schedule ,Integer.parseInt(busStop));
+                        searching_bus(busInfo, adList_schedule ,Integer.parseInt(busStop));
                     }
 
 
@@ -70,39 +70,44 @@ public class SubActivity extends AppCompatActivity {
     }
 
 
-    public void test(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedule, int station_id)////////String 까지 받을수 있도록 수정
+    public void searching_bus(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedule, int station_id)////////String 까지 받을수 있도록 수정
     {
-
-
-
         for (int i = 0 ; i < busInfo.BusInfo_Output_BusStationList().size() ; i++) {
+
+           // System.out.println(station_id);
+           // System.out.println(busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID());
             if (busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID() == station_id) {
 
-                System.out.println("test");
-                station_name = busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationName();
-                break;
+
+                station_place = busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationPlace();
+                System.out.println(station_place);
+                return;
             }
-            System.out.println(busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID());
         }
+    }
 
 
-        if(station_name != null)
+    public void play_Ad(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedule, int station_id)////////String 까지 받을수 있도록 수정
+    {
+        if(adList_num < 0 )
         {
-            //////////////////
-            System.out.println("찾음");
+            
 
-            for (int i = 0 ; i < adList_schedule.size() ; i++) {
-                if (busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID() == station_id) {
 
-                    System.out.println("test");
-                    station_name = busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationName();
-                    break;
-                }
-                System.out.println(busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID());
-            }
 
         }
 
+
+        else if(!station_place.equals(adList_schedule.get(adList_num).getStationPlace()) )///// 지역검사
+        {
+
+
+
+
+
+
+
+        }
     }
 
 }
