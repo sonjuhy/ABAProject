@@ -3,6 +3,7 @@ package com.example.abaproject;
 import android.content.Intent;
 
 import android.os.Bundle;
+import android.view.SurfaceHolder;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,7 +19,7 @@ import static com.example.abaproject.MainActivity.AsyncTaskFinish;
 
 public class SubActivity extends AppCompatActivity {
 
-
+    private AD_player ad_player = new AD_player();
     private XmlParsing xmlParsing;
     private String busStop;
     private AdScheduleManager adScheduleManager = new AdScheduleManager();
@@ -58,7 +59,7 @@ public class SubActivity extends AppCompatActivity {
         };
 
         timer.schedule(TT, 0, 8000); //Timer 실행
-        play_Ad(busInfo,adList_schedule);
+        play_Ad(busInfo, adList_schedule);
 
         //  timer.cancel();//타이머 종료
     }
@@ -85,29 +86,44 @@ public class SubActivity extends AppCompatActivity {
     {
 
         int time_count = -1;
+        int num = 0;
         Calendar calendar = Calendar.getInstance();
+        int start_time= calendar.get(Calendar.HOUR_OF_DAY);
 
 
         while (true) {
 
+
             if (adList_num < 0) {
                 adList_num = searchLocal_in_adList(adList_schedule);
+                time_count = -1;
             } else if (!station_place.equals(adList_schedule.get(adList_num).getStationPlace()))///// 지역검사
             {
                 adList_num = searchLocal_in_adList(adList_schedule);
-            }////////////////////장소 확인
+                time_count = -1;
 
+            }////////////////////장소 확인
             if (time_count < 0)///////////////시간 확인
             {
-                time_count = adList_schedule.get(adList_num).getTime(0);
-            } else if (time_count < calendar.get(Calendar.HOUR_OF_DAY)) {
+                time_count = 0;
+                num = 0;
+            } else if (time_count < calendar.get(Calendar.HOUR_OF_DAY)-start_time) {
                 time_count++;
+                num = 0;
             }
 
 
-            if (true) {
+            if (num<adList_schedule.get(adList_num).getAdList_informations(time_count).size()) {
                 /////////////////동영상 재생
+                ad_player.play(adList_schedule.get(adList_num).getAdList_informations(time_count).get(num).getAdvertisingpath());
+                num++;
             }
+            else{
+                num =0;
+            }
+
+
+
         }
     }
 
