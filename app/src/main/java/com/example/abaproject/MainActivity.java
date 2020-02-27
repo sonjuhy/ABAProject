@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         //여기 밑에 두곳을 원하는 노선번호 고치면 한번에 다 처리됨
         Businfo.BusInfo_Input(0, 100, null);
         RouteNM = "100";
-/*
+
         progressDialog = ProgressDialog.show(
                 MainActivity.this, "Loading...", "Wait Please,,,");
         backgroundThread = new BackgroundThread();
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
- */
+
 
 
         final Intent intent = new Intent(this, SubActivity.class);
@@ -71,10 +71,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO : click event
-
-                intent.putExtra("adList_schedules", adList_schedules);
-                intent.putExtra("Businfo", Businfo);
-                startActivity(intent);
+                if (AsyncTaskFinish != 0) {
+                    intent.putParcelableArrayListExtra("adList_schedules", adList_schedules);
+                    intent.putExtra("Businfo", Businfo);
+                    startActivity(intent);
+                }
             }
         });
 

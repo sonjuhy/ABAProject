@@ -1,6 +1,8 @@
 package com.example.abaproject;
 
-public class BusStationList {
+import java.io.Serializable;
+
+public class BusStationList implements Serializable {
     private int BusRouteID; //버스노선아이디
     private int BusRouteName; //버스노선번호
     private int StationID; //정류장번호

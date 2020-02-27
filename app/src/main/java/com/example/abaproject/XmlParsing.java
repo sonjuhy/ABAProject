@@ -165,6 +165,10 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                                    return busStop;
                                }
                             }
+                            else if (Getname != null && Getname.equals("STATION_NM")) {
+                               System.out.println("station_nm : " + GetText);
+
+                            }
                         }
                         Getname = "";
                         break;
