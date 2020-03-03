@@ -22,7 +22,7 @@ public class SubActivity extends AppCompatActivity {
     private AD_player ad_player = new AD_player();
     private XmlParsing xmlParsing;
     private String busStop;
-    private AdScheduleManager adScheduleManager = new AdScheduleManager();
+    private AdScheduleManager adScheduleManager;
     private String station_place = null;
     private int adList_num = -1;
 
@@ -36,6 +36,11 @@ public class SubActivity extends AppCompatActivity {
         final ArrayList<AdList_Schedule> adList_schedule = intent.getParcelableArrayListExtra("adList_schedules");
 
 
+
+        adScheduleManager = new AdScheduleManager(busInfo,adList_schedule);
+        adScheduleManager.Network_DataArrangement();
+
+        
         Timer timer = new Timer();
         TimerTask TT = new TimerTask() {
             @Override
@@ -59,7 +64,7 @@ public class SubActivity extends AppCompatActivity {
         };
 
         timer.schedule(TT, 0, 8000); //Timer 실행
-        play_Ad(busInfo, adList_schedule);
+       // play_Ad(busInfo, adList_schedule);
 
         //  timer.cancel();//타이머 종료
     }
@@ -115,7 +120,7 @@ public class SubActivity extends AppCompatActivity {
 
             if (num<adList_schedule.get(adList_num).getAdList_informations(time_count).size()) {
                 /////////////////동영상 재생
-                ad_player.play(adList_schedule.get(adList_num).getAdList_informations(time_count).get(num).getAdvertisingpath());
+               // ad_player.play(adList_schedule.get(adList_num).getAdList_informations(time_count).get(num).getAdvertisingpath());
                 num++;
             }
             else{
