@@ -37,10 +37,12 @@ public class SubActivity extends AppCompatActivity {
 
 
 
-        adScheduleManager = new AdScheduleManager(busInfo,adList_schedule);
-        adScheduleManager.Network_DataArrangement();
 
-        
+        adScheduleManager = new AdScheduleManager(busInfo,adList_schedule);
+        adScheduleManager.Network_DataArrangement("반지동");
+        //adScheduleManager.Network_DataArrangement();
+
+
         Timer timer = new Timer();
         TimerTask TT = new TimerTask() {
             @Override
@@ -63,7 +65,12 @@ public class SubActivity extends AppCompatActivity {
             }
         };
 
-        timer.schedule(TT, 0, 8000); //Timer 실행
+
+
+
+
+
+        //timer.schedule(TT, 0, 8000); //Timer 실행
        // play_Ad(busInfo, adList_schedule);
 
         //  timer.cancel();//타이머 종료

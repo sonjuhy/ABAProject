@@ -24,7 +24,3 @@ public class AdList_Information {
         return time;
     }
 }
-
-class AdList_Information_Network{
-
-}

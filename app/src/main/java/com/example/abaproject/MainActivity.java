@@ -50,7 +50,12 @@ public class MainActivity extends AppCompatActivity {
         backgroundThread.setRunning(true);
         backgroundThread.start();
 
+
+
+
         Log.v("thread test", "background end");
+
+
         while (true) {
             if (threadcheck == true) {
                 try {
