@@ -79,20 +79,20 @@ public class AdScheduleManager{
             }
         }
     }
-    public boolean Network_DataArrangement(String local){ //testing
+    public boolean Network_DataArrangement(String local) throws UnsupportedEncodingException { //testing
         //_param mean String[] _param
 
             local_information_storage();
-            Network_Access("Get_AD_information", URLEncoder.encode("AD_local="+local));//Running Network
+            Network_Access("Get_AD_information", URLEncoder.encode(("AD_local"),"UTF-8") +"="+ URLEncoder.encode(local,"UTF-8"));//Running Network
         return true;//Working is Success
     }
 
-    public boolean Network_DataArrangement(){ //Setting for Network Class Value before Working Network Class
+    public boolean Network_DataArrangement() throws UnsupportedEncodingException { //Setting for Network Class Value before Working Network Class
         //_param mean String[] _param
 
         local_information_storage();
         for(int i =0 ; i < local.size() ; i++) {
-            Network_Access("Get_AD_Information", URLEncoder.encode("AD_local="+local.get(i)));//Running Network
+            Network_Access("Get_AD_Information", URLEncoder.encode("AD_local"+local.get(i),"UTF-8"));
         }
 
 

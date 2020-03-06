@@ -7,6 +7,7 @@ import android.view.SurfaceHolder;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,7 +40,11 @@ public class SubActivity extends AppCompatActivity {
 
 
         adScheduleManager = new AdScheduleManager(busInfo,adList_schedule);
-        adScheduleManager.Network_DataArrangement("반지동");
+        try {
+            adScheduleManager.Network_DataArrangement("반지동");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         //adScheduleManager.Network_DataArrangement();
 
 
