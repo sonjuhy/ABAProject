@@ -10,15 +10,17 @@ public class AdList_Schedule implements Parcelable {
 
 
     private String StationPlace; //재생위치위치(동)
-    private int[] time = new int[3];
-    private ArrayList<AdList_Information> adList_informations_0 = new ArrayList<AdList_Information>();
-    private ArrayList<AdList_Information> adList_informations_1 = new ArrayList<AdList_Information>();
-    private ArrayList<AdList_Information> adList_informations_2 = new ArrayList<AdList_Information>();
+    private ArrayList<Integer> adList_informations_0 = new ArrayList<Integer>();
+    private ArrayList<Integer> adList_informations_1 = new ArrayList<Integer>();
+    private ArrayList<Integer> adList_informations_2 = new ArrayList<Integer>();
 
     protected AdList_Schedule(Parcel in) {
         StationPlace = in.readString();
-        time = in.createIntArray();
     }
+    public AdList_Schedule() {
+
+    }
+
 
     public static final Creator<AdList_Schedule> CREATOR = new Creator<AdList_Schedule>() {
         @Override
@@ -40,18 +42,15 @@ public class AdList_Schedule implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(StationPlace);
-        parcel.writeIntArray(time);
     }
 
     public String getStationPlace() {
         return StationPlace;
     }
 
-    public int getTime(int i) {
-        return time[i];
-    }
 
-    public ArrayList<AdList_Information> getAdList_informations(int i) {
+
+    public ArrayList<Integer> getAdList_informations(int i) {
 
         if (i == 0) {
             return adList_informations_0;

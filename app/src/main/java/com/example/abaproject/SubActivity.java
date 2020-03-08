@@ -26,6 +26,7 @@ public class SubActivity extends AppCompatActivity {
     private AdScheduleManager adScheduleManager;
     private String station_place = null;
     private int adList_num = -1;
+    private ArrayList<AdList_Information> adList_Information = new ArrayList<AdList_Information>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,13 +40,15 @@ public class SubActivity extends AppCompatActivity {
 
 
 
-        adScheduleManager = new AdScheduleManager(busInfo,adList_schedule);
+        adScheduleManager = new AdScheduleManager(busInfo,adList_schedule, adList_Information);
         try {
-            adScheduleManager.Network_DataArrangement("반지동");
+           adScheduleManager.Network_DataArrangement("반지동"); //////////testing
+         //   adScheduleManager.Network_DataArrangement();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        //adScheduleManager.Network_DataArrangement();
+
+
 
 
         Timer timer = new Timer();
@@ -54,7 +57,7 @@ public class SubActivity extends AppCompatActivity {
             public void run() {
                 // 반복실행할 구문
                 try {
-                    busStop = new XmlParsing().execute("BusPosition", "379000100", "경남71자1084").get();
+                    busStop = new XmlParsing().execute("BusPosition", "379000100", "경남71자1102").get();
 
                     if (AsyncTaskFinish != 0) {
                         System.out.println(busStop);
@@ -75,13 +78,11 @@ public class SubActivity extends AppCompatActivity {
 
 
 
-        //timer.schedule(TT, 0, 8000); //Timer 실행
+       // timer.schedule(TT, 0, 8000); //Timer 실행
        // play_Ad(busInfo, adList_schedule);
 
         //  timer.cancel();//타이머 종료
     }
-
-
     public void searching_bus(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedule, int station_id)////////String 까지 받을수 있도록 수정
     {
         for (int i = 0; i < busInfo.BusInfo_Output_BusStationList().size(); i++) {
