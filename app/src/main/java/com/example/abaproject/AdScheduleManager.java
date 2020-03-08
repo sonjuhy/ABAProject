@@ -12,10 +12,12 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 public class AdScheduleManager {
-
+    private ArrayList<Integer> System_count = new ArrayList<Integer>();
     private String station_name = null;
     private BusInfo busInfo;
     private ArrayList<AdList_Schedule> adList_schedules;
@@ -26,8 +28,7 @@ public class AdScheduleManager {
     private Network n;
 
 
-    class Time_storage
-    {
+    class Time_storage {
         int number;
         ArrayList<Integer> time = new ArrayList<Integer>();
 
@@ -43,7 +44,7 @@ public class AdScheduleManager {
 
     }
 
-    public AdScheduleManager(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedules,ArrayList<AdList_Information>adList_Information) {
+    public AdScheduleManager(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedules, ArrayList<AdList_Information> adList_Information) {
         this.busInfo = busInfo;
         this.adList_schedules = adList_schedules;
         local = new ArrayList<String>();
@@ -107,87 +108,126 @@ public class AdScheduleManager {
         for (int i = 0; i < local.size(); i++) {
             Network_Access("Get_AD_information", URLEncoder.encode(("AD_local"), "UTF-8") + "=" + URLEncoder.encode(local.get(i), "UTF-8"));//Running Network
             Get_ADData(Network_data, local.get(i));//translate JSonData from Server to Java and Save Data
+            adScheduling();
         }
         return true;//Working is Success
     }
 
 
-    private void Get_ADData(String mJsonString, String local) {//Parsing data(JSon to Java)
+    public void adScheduling() {
 
-        ArrayList<Integer> System_count = new ArrayList<Integer>();
-        int ADnumber= -9999;
+
+        for (int i = 0; i < adList_Information.size(); i++) {
+
+            for (int j = 0; j < adList_Information.get(i).getStationPlace().size(); j++) {
+                for (int k = 0; k < adList_schedules.size(); k++) {
+                    if (adList_Information.get(i).getStationPlace().get(j) == adList_schedules.get(k).getStationPlace()) {
+
+
+                    }
+
+                }
+            }
+
+
+        }
+
+
+    }
+
+
+    private void Get_ADData(String mJsonString, String local) {//Parsing data(JSon to Java)
+        Calendar calendar = Calendar.getInstance();
+        int schedule_count = 0;
+        int ADnumber = -9999;
         int MaxCount;
         int count;
         int time;
+        int server_time=-999;
         AdList_Information temp_adList_Information;
         String ADname;
         int ADnumber_time;
-        ArrayList<Integer> temp= null;
-
+        ArrayList<Integer> tempTime = null;
+        AdList_Schedule tmepList = null;
 
         System.out.println("mjson : " + mJsonString);
         try {
             JSONObject jsonObject = new JSONObject(mJsonString);//Make object for Checking frist object data in JsonArray
+
             JSONArray jsonArray = jsonObject.getJSONArray("data");//Checking JSonArray
 
 
-
-
-
             for (int i = 0; i < jsonArray.length(); i++) {
-                System.out.println("parsing : "+mJsonString);
+                System.out.println("parsing : " + mJsonString);
                 JSONObject jsonObject1 = jsonArray.getJSONObject(i);//JSonArray[i] Data is moved to jsonObject1
                 ADnumber = Integer.parseInt(jsonObject1.getString("ADnumber"));
                 MaxCount = Integer.parseInt(jsonObject1.getString("MaxCount"));
                 count = Integer.parseInt(jsonObject1.getString("count"));
                 ADname = jsonObject1.getString("ADname");
 
-                if(!System_count.contains(ADnumber)) {
-                    temp = new ArrayList<Integer>();
-                    Network_Access("Get_AD_Time", URLEncoder.encode(("AD_number"), "UTF-8") + "=" + URLEncoder.encode(String.valueOf(ADnumber),"UTF-8"));//Running Network
-                    JSONObject jsonObject_time = new JSONObject(Network_data);//Make object for Checking frist object data in JsonArray
-                    JSONArray jsonArray_time = jsonObject_time.getJSONArray("data");//Checking JSonArray
 
-                    for (int j = 0; j < jsonArray_time.length(); j++) {
-                        JSONObject jsonObject1_time = jsonArray_time.getJSONObject(j);//JSonArray[i] Data is moved to jsonObject1
-                        ADnumber = Integer.parseInt(jsonObject1_time.getString("ADnumber"));
-                        time = Integer.parseInt(jsonObject1_time.getString("time"));
+                tempTime = new ArrayList<Integer>();
+                Network_Access("Get_AD_Time", URLEncoder.encode(("AD_number"), "UTF-8") + "=" + ADnumber);//Running Network
+                JSONObject jsonObject_time = new JSONObject(Network_data);//Make object for Checking frist object data in JsonArray
+                JSONArray jsonArray_time = jsonObject_time.getJSONArray("data");//Checking JSonArray
 
-                        System.out.println("time_data : " + time);
-                        temp.add(time);
-                    }
-                    System_count.add(ADnumber);
+                for (int j = 0; j < jsonArray_time.length(); j++) {
+                    JSONObject jsonObject1_time = jsonArray_time.getJSONObject(j);//JSonArray[i] Data is moved to jsonObject1
+
+                    time = Integer.parseInt(jsonObject1_time.getString("time"));
+                    System.out.println("time_data : " + time);
+                    tempTime.add(time);
+                }
+                if(server_time<0)
+                {
+                    jsonArray_time = jsonObject_time.getJSONArray("server");//Checking JSonArray
+
+                    jsonObject1 = jsonArray_time.getJSONObject(0);//JSonArray[i] Data is moved to jsonObject1
+                    server_time = Integer.parseInt(jsonObject1.getString("server_time"));
+                    System.out.println("server_time : " + server_time);
                 }
 
-                if(ADnumber > -1)
-                {
-                    if(!System_count.contains(ADnumber))
-                    {
-                        System.out.println("insert AdList_Information : " +ADnumber+ADname+MaxCount+count+temp.toString());
-                        temp_adList_Information = new AdList_Information(ADnumber,ADname,MaxCount,count, temp);
-                        adList_Information.add(temp_adList_Information);
-                    }
-                    else
-                    {
-                        for(int j =0 ; j<adList_Information.size();j++)
-                        {
-                            if(adList_Information.get(j).getADnumber() == ADnumber)
-                            {
-                                adList_Information.get(j).getStationPlace().add(local);
-                            }
+
+                if (!System_count.contains(ADnumber)) {
+
+                    temp_adList_Information = new AdList_Information(ADnumber, ADname, MaxCount, count, tempTime, local);
+
+                    System.out.println("---------------------" + ADnumber);
+                    adList_Information.add(temp_adList_Information);
+
+                    System_count.add(ADnumber);
+                } else {
+                    for (int j = 0; j < adList_Information.size(); j++) {
+                        if (adList_Information.get(j).getADnumber() == ADnumber) {
+                            adList_Information.get(j).getStationPlace().add(local);
+                            System.out.println("******************" + ADnumber);
                         }
                     }
-                    ADnumber =-999;
+                }
+
+                if (i == 0) {
+                    tmepList = new AdList_Schedule();
+                }
+                for (int j = 0; j < tempTime.size(); j++) {
+
+                    tmepList.getAdList_informations(tempTime.get(j) - server_time).add(ADnumber);///////////// 서버 시간으로 바꿔야됨
                 }
             }
-
-        } catch (JSONException e) {
+            if (tmepList != null) {
+                tmepList.setStationPlace(local);
+                adList_schedules.add(tmepList);
+            }
+        } catch (
+                JSONException e) {
             e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+        } catch (
+                UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
 
     }
+
+
 }
 

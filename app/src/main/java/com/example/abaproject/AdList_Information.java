@@ -13,12 +13,14 @@ public class AdList_Information {
 
     private ArrayList<String> StationPlace; //재생위치위치(동)
 
-    public AdList_Information(int ADnumber, String name, int maximumPlays, int count, ArrayList<Integer> time) {
+    public AdList_Information(int ADnumber, String name, int maximumPlays, int count, ArrayList<Integer> time ,String StationPlace) {
         this.ADnumber = ADnumber;
         this.name = name;
         MaximumPlays = maximumPlays;
         this.count = count;
         this.time = time;
+        this.StationPlace =new ArrayList<String>();
+        this.StationPlace.add(StationPlace);
     }
 
     public AdList_Information() {

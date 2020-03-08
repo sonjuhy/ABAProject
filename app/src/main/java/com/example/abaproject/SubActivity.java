@@ -42,13 +42,13 @@ public class SubActivity extends AppCompatActivity {
 
         adScheduleManager = new AdScheduleManager(busInfo,adList_schedule, adList_Information);
         try {
-           adScheduleManager.Network_DataArrangement("반지동"); //////////testing
-         //   adScheduleManager.Network_DataArrangement();
+           //adScheduleManager.Network_DataArrangement("반지동"); //////////testing
+           adScheduleManager.Network_DataArrangement();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-
+      // System.out.println(adList_Information.get(0).getStationPlace().get(0));
 
 
         Timer timer = new Timer();
