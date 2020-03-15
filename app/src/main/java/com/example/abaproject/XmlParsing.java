@@ -118,7 +118,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                                 } else if (Getname != null && Getname.equals("STATION_NM")) {
                                     //System.out.println("station_nm : " + GetText);
                                     tmpB.BusStation_Input_BusLocationPart(0, 0, 0, GetText);
-                                    Businfo.BusInfo_Input(0,0,tmpB);
+                                    Businfo.BusInfo_Input(0,0, "", tmpB);
                                     tmpB = new BusStationList();
                                 }
                             }
@@ -149,7 +149,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                                 //System.out.println("Route ID : " + tmp_RouteID + " Route_NM : " + tmp_RouteNM);
                                 if(tmp_RouteNM != null && tmp_RouteNM.equals(strings[1])) {
                                     System.out.println("Route NM : " + tmp_RouteID + " string[1] : " + strings[1]);
-                                    Businfo.BusInfo_Input(Integer.parseInt(tmp_RouteID), Integer.parseInt(strings[1]), null);
+                                    Businfo.BusInfo_Input(Integer.parseInt(tmp_RouteID), Integer.parseInt(strings[1]), "",null);
                                 }
                             }
                         }

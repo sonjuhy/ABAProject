@@ -15,12 +15,15 @@ public class BusInfo implements Serializable {
         BusNum = null;
         B = new ArrayList<>();
     }
-    public void BusInfo_Input(int RouteID, int RouteNM, BusStationList B){
+    public void BusInfo_Input(int RouteID, int RouteNM, String BusNum, BusStationList B){
         if(RouteNM != 0) {
             this.RouteNM = RouteNM;
         }
         if(RouteID != 0) {
             this.RouteID = RouteID;
+        }
+        if(!("".equals(BusNum))){
+            this.BusNum = BusNum;
         }
         if(B != null){
             this.B.add(B);

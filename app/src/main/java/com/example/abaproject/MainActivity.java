@@ -1,17 +1,24 @@
 package com.example.abaproject;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,58 +31,62 @@ public class MainActivity extends AppCompatActivity {
     private BackgroundThread backgroundThread;
     private XmlParsing xmlParsing;
     private MapJsonParsing mapJsonParsing;
-    private String RouteNM;
+    private String RouteNM, BusName;
+    private SSH ssh;//for ssh connect and sftp connect
     private boolean threadcheck = false;
 
+    private String Local_Path;
+    private String folder_device;
+    private String folder_server;
+    private String filename;
+    private String[] command;
+    private File dir;
+
+    private Button button_ok;
+    private TextView Car_Num, Bus_Num;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         adList_schedules = new ArrayList<AdList_Schedule>();
+        final Intent intent = new Intent(this, SubActivity.class);
 
+        button_ok = findViewById(R.id.button);
+        Car_Num = findViewById(R.id.editText2);
+        Bus_Num = findViewById(R.id.editText3);
 
         Businfo = new BusInfo();
-        XmlParsing X = new XmlParsing();
-        MapJsonParsing m = new MapJsonParsing();
-        String test = "well...";
 
-        System.out.println("MainActivity : " + test);
-        //여기 밑에 두곳을 원하는 노선번호 고치면 한번에 다 처리됨
-        Businfo.BusInfo_Input(0, 100, null);
-        RouteNM = "100";
+        Local_Path = Environment.getExternalStorageDirectory().getAbsolutePath();
+        folder_device = Local_Path + "/ABAProject/";//route for make folder in android device
+        folder_server = "var/www/ABA/g5/file/free/";//point of server folder with ad video
+        filename = "/";//add filename(ad video name)
+        Folder_Setting();//make folder and allow permission for use storage
 
-        progressDialog = ProgressDialog.show(
-                MainActivity.this, "Loading...", "Wait Please,,,");
-        backgroundThread = new BackgroundThread();
-        backgroundThread.setRunning(true);
-        backgroundThread.start();
-
-
-
-
-        Log.v("thread test", "background end");
-
-
-        while (true) {
-            if (threadcheck == true) {
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
-
-
-
-
-        final Intent intent = new Intent(this, SubActivity.class);
-        Button button1 = (Button) findViewById(R.id.button);
-        button1.setOnClickListener(new Button.OnClickListener() {
+        button_ok.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                // TODO : click event
+            public void onClick(View v) {
+                RouteNM = Bus_Num.getText().toString();
+                BusName = Car_Num.getText().toString();
+                System.out.println("RouteNM / BusName : "+RouteNM +" / " + BusName);
+                Businfo.BusInfo_Input(0, Integer.parseInt(RouteNM), BusName,null);
+
+                progressDialog = ProgressDialog.show(//show progressbar while download information about ABA Project
+                        MainActivity.this, "Loading...", "Wait Please,,,");
+                backgroundThread = new BackgroundThread();
+                backgroundThread.setRunning(true);
+                backgroundThread.start();//start download information
+                while (true) {
+                    if (threadcheck == true) {
+                        try {
+                            Thread.sleep(1500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                }
+                Log.v("thread test", "background end");
                 if (AsyncTaskFinish != 0) {
                     intent.putParcelableArrayListExtra("adList_schedules", adList_schedules);
                     intent.putExtra("Businfo", Businfo);
@@ -83,16 +94,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-
-        System.out.println("Route Name : " + Businfo.BusInfo_Output_RouteNM());
-        System.out.println("Route ID : " + Businfo.BusInfo_Output_RouteID());
-        for (int i = 0; i < Businfo.BusInfo_Output_BusStationList().size(); i++) {
-            System.out.println("Station Name : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationName());
-            System.out.println("Station ID : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID());
-            System.out.println("Station X : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationX());
-            System.out.println("Station Y : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationY());
-            System.out.println("Station Place : " + Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationPlace());
+    }
+    private void Folder_Setting(){
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            //if storage permission isn't allow, popup to allow selecting
+            System.out.println("Storage Permission is denied");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+        }
+        else{
+            System.out.println("Storage Permission is allowed");
+        }
+        if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
+            //check existing about out storage
+            System.out.println("Can use SD");
+        }
+        if(!dir.exists()){
+            System.out.println("folder isn't exist");
+            //make folder
+            dir.mkdirs();
+        }
+        else{
+            System.out.println("already exist");
         }
     }
 
@@ -116,7 +138,19 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Station Load End");
             StationPlace_Load();
             System.out.println("Station Place End");
-            System.out.println("thread test");
+            /*
+            * write here about load AD info list
+            * */
+            if(!("".equals(filename))) {//Download AD video from server
+                ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298");
+                ssh.execute("SFTP", folder_server, folder_device + filename);
+            }
+            /* use here when after make AD info list
+            if(!("".equals(filename))){//Send Command to Raspberry Pi(ex : send video, show video etc)
+                ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298");
+                ssh.execute("SSH", command[0]);
+            }
+            */
             threadcheck = true;
             while (running) {
                 if (threadcheck == true)
