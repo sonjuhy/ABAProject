@@ -92,6 +92,19 @@ public class AdScheduleManager {
         }
     }
 
+    public int getServer_time() throws JSONException {
+        int server_time = -999;
+
+        Network_Access("Get_server_time", "");//Running Network
+        JSONObject jsonObject = new JSONObject(Network_data);//Make object for Checking frist object data in JsonArray
+        JSONArray jsonArray = jsonObject.getJSONArray("data");//Checking JSonArray
+        JSONObject jsonObject1 = jsonArray.getJSONObject(0);//JSonArray[i] Data is moved to jsonObject1
+        server_time = Integer.parseInt(jsonObject1.getString("Time"));
+
+        return server_time;
+    }
+
+
     public boolean Network_DataArrangement(String local) throws UnsupportedEncodingException { //testing
         //_param mean String[] _param
 
@@ -108,31 +121,8 @@ public class AdScheduleManager {
         for (int i = 0; i < local.size(); i++) {
             Network_Access("Get_AD_information", URLEncoder.encode(("AD_local"), "UTF-8") + "=" + URLEncoder.encode(local.get(i), "UTF-8"));//Running Network
             Get_ADData(Network_data, local.get(i));//translate JSonData from Server to Java and Save Data
-            adScheduling();
         }
         return true;//Working is Success
-    }
-
-
-    public void adScheduling() {
-
-
-        for (int i = 0; i < adList_Information.size(); i++) {
-
-            for (int j = 0; j < adList_Information.get(i).getStationPlace().size(); j++) {
-                for (int k = 0; k < adList_schedules.size(); k++) {
-                    if (adList_Information.get(i).getStationPlace().get(j) == adList_schedules.get(k).getStationPlace()) {
-
-
-                    }
-
-                }
-            }
-
-
-        }
-
-
     }
 
 
@@ -143,7 +133,7 @@ public class AdScheduleManager {
         int MaxCount;
         int count;
         int time;
-        int server_time=-999;
+        int server_time = -999;
         AdList_Information temp_adList_Information;
         String ADname;
         int ADnumber_time;
@@ -153,7 +143,6 @@ public class AdScheduleManager {
         System.out.println("mjson : " + mJsonString);
         try {
             JSONObject jsonObject = new JSONObject(mJsonString);//Make object for Checking frist object data in JsonArray
-
             JSONArray jsonArray = jsonObject.getJSONArray("data");//Checking JSonArray
 
 
@@ -178,8 +167,7 @@ public class AdScheduleManager {
                     System.out.println("time_data : " + time);
                     tempTime.add(time);
                 }
-                if(server_time<0)
-                {
+                if (server_time < 0) {
                     jsonArray_time = jsonObject_time.getJSONArray("server");//Checking JSonArray
 
                     jsonObject1 = jsonArray_time.getJSONObject(0);//JSonArray[i] Data is moved to jsonObject1

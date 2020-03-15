@@ -7,6 +7,8 @@ import android.view.SurfaceHolder;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONException;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,17 +40,30 @@ public class SubActivity extends AppCompatActivity {
         final ArrayList<AdList_Schedule> adList_schedule = intent.getParcelableArrayListExtra("adList_schedules");
 
 
-
-
-        adScheduleManager = new AdScheduleManager(busInfo,adList_schedule, adList_Information);
+        adScheduleManager = new AdScheduleManager(busInfo, adList_schedule, adList_Information);
         try {
-           //adScheduleManager.Network_DataArrangement("반지동"); //////////testing
-           adScheduleManager.Network_DataArrangement();
+            //adScheduleManager.Network_DataArrangement("반지동"); //////////testing
+            adScheduleManager.Network_DataArrangement();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-      // System.out.println(adList_Information.get(0).getStationPlace().get(0));
+        System.out.println("크기 : " + adList_schedule.size());
+
+
+        for (int i = 0; i < adList_schedule.size(); i++) {
+            System.out.println("동이름 : " + adList_schedule.get(i).getStationPlace());
+            for (int j = 0; j < 3; j++) {
+                if (adList_schedule.get(i).getAdList_informations(j) != null) {
+                    for (int k = 0; k < adList_schedule.get(i).getAdList_informations(j).size(); k++)
+                        System.out.println(j + " = adnumber : " + adList_schedule.get(i).getAdList_informations(j).get(k));
+                }
+
+            }
+        }
+
+
+        // System.out.println(adList_Information.get(0).getStationPlace().get(0));
 
 
         Timer timer = new Timer();
@@ -74,15 +89,16 @@ public class SubActivity extends AppCompatActivity {
         };
 
 
-
-
-
-
-       // timer.schedule(TT, 0, 8000); //Timer 실행
-       // play_Ad(busInfo, adList_schedule);
+        timer.schedule(TT, 0, 8000); //Timer 실행
+        try {
+            play_Ad(adList_schedule);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         //  timer.cancel();//타이머 종료
     }
+
     public void searching_bus(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedule, int station_id)////////String 까지 받을수 있도록 수정
     {
         for (int i = 0; i < busInfo.BusInfo_Output_BusStationList().size(); i++) {
@@ -100,48 +116,40 @@ public class SubActivity extends AppCompatActivity {
     }
 
 
-    public void play_Ad(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedule)////////String 까지 받을수 있도록 수정
+    public void play_Ad( ArrayList<AdList_Schedule> adList_schedule) throws JSONException////////String 까지 받을수 있도록 수정
     {
 
-        int time_count = -1;
-        int num = 0;
-        Calendar calendar = Calendar.getInstance();
-        int start_time= calendar.get(Calendar.HOUR_OF_DAY);
+        int Ad_List_time_count = 0;//////시간별 재생위치
+        int current_time = -999;
+        int temp = 0;
+        int start_time = adScheduleManager.getServer_time();
+        AdList_Schedule playAdList = adList_schedule.get(searchLocal_in_adList(adList_schedule));
 
-
-        while (true) {
-
-
-            if (adList_num < 0) {
-                adList_num = searchLocal_in_adList(adList_schedule);
-                time_count = -1;
-            } else if (!station_place.equals(adList_schedule.get(adList_num).getStationPlace()))///// 지역검사
-            {
-                adList_num = searchLocal_in_adList(adList_schedule);
-                time_count = -1;
-
-            }////////////////////장소 확인
-            if (time_count < 0)///////////////시간 확인
-            {
-                time_count = 0;
-                num = 0;
-            } else if (time_count < calendar.get(Calendar.HOUR_OF_DAY)-start_time) {
-                time_count++;
-                num = 0;
+        while (station_place !=null) {
+            ///장소확인
+            if (!playAdList.getStationPlace().equals(station_place)) {
+                playAdList = adList_schedule.get(searchLocal_in_adList(adList_schedule));
+            }
+            ///시간확인
+            temp = (adScheduleManager.getServer_time() - start_time);
+            if (current_time != temp) {
+                current_time = temp;
+                Ad_List_time_count = 0;
             }
 
+            ////// 재생
+            for (int i = 0; i < this.adList_Information.size(); i++) {
+                //////재생되어야할 광고번호 광고 리스트에서찾기
+                if (playAdList.getAdList_informations(current_time).get(Ad_List_time_count) == this.adList_Information.get(i).getADnumber()) {
+                    this.adList_Information.get(i).getAdvertisingpath();///동영상 경로
 
-            if (num<adList_schedule.get(adList_num).getAdList_informations(time_count).size()) {
-                /////////////////동영상 재생
-               // ad_player.play(adList_schedule.get(adList_num).getAdList_informations(time_count).get(num).getAdvertisingpath());
-                num++;
+                    //////////// play
+                    System.out.println("play : " + this.adList_Information.get(i).getADnumber());
+
+
+                    Ad_List_time_count++;
+                }
             }
-            else{
-                num =0;
-            }
-
-
-
         }
     }
 
@@ -150,9 +158,12 @@ public class SubActivity extends AppCompatActivity {
     {
         for (int i = 0; i < adList_schedule.size(); i++) {
             if (adList_schedule.get(i).getStationPlace().equals(station_place)) {
+                System.out.println("station_place : "+station_place);
+                System.out.println("adList_Information : "+i);
                 return i;
             }
         }
+        System.out.println("adList_Information does not exist");
         return -1;
     }
 
