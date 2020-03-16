@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         folder_device = Local_Path + "/ABAProject/";//route for make folder in android device
         folder_server = "var/www/ABA/g5/file/free/";//point of server folder with ad video
         filename = "/";//add filename(ad video name)
-        Folder_Setting();//make folder and allow permission for use storage
+       // Folder_Setting();//make folder and allow permission for use storage
 
         button_ok.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,7 +143,8 @@ public class MainActivity extends AppCompatActivity {
             * */
             if(!("".equals(filename))) {//Download AD video from server
                 ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298");
-                ssh.execute("SFTP", folder_server, folder_device + filename);
+               // ssh.execute("SFTP", folder_server, folder_device + /////////// test
+
             }
             /* use here when after make AD info list
             if(!("".equals(filename))){//Send Command to Raspberry Pi(ex : send video, show video etc)

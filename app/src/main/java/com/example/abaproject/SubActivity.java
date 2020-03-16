@@ -29,6 +29,7 @@ public class SubActivity extends AppCompatActivity {
     private String station_place = null;
     private int adList_num = -1;
     private ArrayList<AdList_Information> adList_Information = new ArrayList<AdList_Information>();
+    private ArrayList<AdList_Schedule> adList_schedule = new ArrayList<AdList_Schedule>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +38,6 @@ public class SubActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         final BusInfo busInfo = (BusInfo) intent.getSerializableExtra("Businfo");
-        final ArrayList<AdList_Schedule> adList_schedule = intent.getParcelableArrayListExtra("adList_schedules");
-
 
         adScheduleManager = new AdScheduleManager(busInfo, adList_schedule, adList_Information);
         try {
@@ -50,9 +49,9 @@ public class SubActivity extends AppCompatActivity {
 
         System.out.println("크기 : " + adList_schedule.size());
 
-
+        ////////////광고 리스트 지역별 출력
         for (int i = 0; i < adList_schedule.size(); i++) {
-            System.out.println("동이름 : " + adList_schedule.get(i).getStationPlace());
+            System.out.println("adList_schedule 동이름 : " + adList_schedule.get(i).getStationPlace());
             for (int j = 0; j < 3; j++) {
                 if (adList_schedule.get(i).getAdList_informations(j) != null) {
                     for (int k = 0; k < adList_schedule.get(i).getAdList_informations(j).size(); k++)
@@ -75,8 +74,10 @@ public class SubActivity extends AppCompatActivity {
                     busStop = new XmlParsing().execute("BusPosition", "379000100", "경남71자1102").get();
 
                     if (AsyncTaskFinish != 0) {
-                        System.out.println(busStop);
+
                         searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
+                       // station_place = "신월동";/////////--------------test용!
+                        System.out.println("time per 30's___station_place : " + station_place);
                     }
 
 
@@ -89,9 +90,12 @@ public class SubActivity extends AppCompatActivity {
         };
 
 
-        timer.schedule(TT, 0, 8000); //Timer 실행
+        timer.schedule(TT, 0, 10000); //Timer 실행
         try {
+            while (station_place == null) {
+            }
             play_Ad(adList_schedule);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -109,6 +113,7 @@ public class SubActivity extends AppCompatActivity {
 
 
                 station_place = busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationPlace();
+
                 System.out.println(station_place);
                 return;
             }
@@ -116,54 +121,77 @@ public class SubActivity extends AppCompatActivity {
     }
 
 
-    public void play_Ad( ArrayList<AdList_Schedule> adList_schedule) throws JSONException////////String 까지 받을수 있도록 수정
+    public void play_Ad(ArrayList<AdList_Schedule> adList_schedule) throws JSONException////////String 까지 받을수 있도록 수정
     {
 
         int Ad_List_time_count = 0;//////시간별 재생위치
         int current_time = -999;
         int temp = 0;
         int start_time = adScheduleManager.getServer_time();
-        AdList_Schedule playAdList = adList_schedule.get(searchLocal_in_adList(adList_schedule));
+        AdList_Schedule playAdList=null;
 
-        while (station_place !=null) {
+        while (station_place != null) {
+
+
+            try {
+                playAdList  = adList_schedule.get(searchLocal_in_adList());
+            } catch (NullPointerException e) {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e2) {
+                    System.out.println("해당지역 광고 없음 ..........");
+                    e2.printStackTrace();
+                }
+            }
+
             ///장소확인
             if (!playAdList.getStationPlace().equals(station_place)) {
-                playAdList = adList_schedule.get(searchLocal_in_adList(adList_schedule));
+                playAdList = adList_schedule.get(searchLocal_in_adList());
             }
             ///시간확인
             temp = (adScheduleManager.getServer_time() - start_time);
             if (current_time != temp) {
                 current_time = temp;
                 Ad_List_time_count = 0;
+                System.out.println("current_time : " + current_time);
             }
 
             ////// 재생
             for (int i = 0; i < this.adList_Information.size(); i++) {
                 //////재생되어야할 광고번호 광고 리스트에서찾기
                 if (playAdList.getAdList_informations(current_time).get(Ad_List_time_count) == this.adList_Information.get(i).getADnumber()) {
-                    this.adList_Information.get(i).getAdvertisingpath();///동영상 경로
+                    //this.adList_Information.get(i).getAdvertisingpath();///동영상 경로 // 나중에 살리기
 
                     //////////// play
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    ///////// play
                     System.out.println("play : " + this.adList_Information.get(i).getADnumber());
 
 
                     Ad_List_time_count++;
+                    if (playAdList.getAdList_informations(current_time).size() <= Ad_List_time_count) {
+                        Ad_List_time_count = 0;
+                    }
+                    break;
+                    ///////////////test용 딜레이
                 }
             }
         }
     }
 
 
-    public int searchLocal_in_adList(ArrayList<AdList_Schedule> adList_schedule)////////String 까지 받을수 있도록 수정
+    public int searchLocal_in_adList()////////String 까지 받을수 있도록 수정
     {
         for (int i = 0; i < adList_schedule.size(); i++) {
             if (adList_schedule.get(i).getStationPlace().equals(station_place)) {
-                System.out.println("station_place : "+station_place);
-                System.out.println("adList_Information : "+i);
                 return i;
             }
         }
-        System.out.println("adList_Information does not exist");
+        System.out.println("**************adList_Information does not exist**********");
         return -1;
     }
 

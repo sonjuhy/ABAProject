@@ -153,13 +153,13 @@ public class AdScheduleManager {
                 MaxCount = Integer.parseInt(jsonObject1.getString("MaxCount"));
                 count = Integer.parseInt(jsonObject1.getString("count"));
                 ADname = jsonObject1.getString("ADname");
-
+                ////// 광고 정보
 
                 tempTime = new ArrayList<Integer>();
                 Network_Access("Get_AD_Time", URLEncoder.encode(("AD_number"), "UTF-8") + "=" + ADnumber);//Running Network
                 JSONObject jsonObject_time = new JSONObject(Network_data);//Make object for Checking frist object data in JsonArray
                 JSONArray jsonArray_time = jsonObject_time.getJSONArray("data");//Checking JSonArray
-
+                ////// 광고 시간정보
                 for (int j = 0; j < jsonArray_time.length(); j++) {
                     JSONObject jsonObject1_time = jsonArray_time.getJSONObject(j);//JSonArray[i] Data is moved to jsonObject1
 
@@ -197,7 +197,6 @@ public class AdScheduleManager {
                     tmepList = new AdList_Schedule();
                 }
                 for (int j = 0; j < tempTime.size(); j++) {
-
                     tmepList.getAdList_informations(tempTime.get(j) - server_time).add(ADnumber);///////////// 서버 시간으로 바꿔야됨
                 }
             }
