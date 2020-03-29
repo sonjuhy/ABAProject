@@ -1,10 +1,6 @@
 package com.example.abaproject;
 
 
-import android.os.Handler;
-import android.os.Message;
-import android.widget.Toast;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,7 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 public class AdScheduleManager {
@@ -22,7 +17,7 @@ public class AdScheduleManager {
     private BusInfo busInfo;
     private ArrayList<AdList_Schedule> adList_schedules;
     private ArrayList<String> local;
-    private ArrayList<AdList_Information> adList_Information = new ArrayList<AdList_Information>();
+    private ArrayList<Ad_Information> adList_Information = new ArrayList<Ad_Information>();
     private StringBuilder urlData = new StringBuilder("");
     private String Network_data;
     private Network n;
@@ -44,7 +39,7 @@ public class AdScheduleManager {
 
     }
 
-    public AdScheduleManager(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedules, ArrayList<AdList_Information> adList_Information) {
+    public AdScheduleManager(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedules, ArrayList<Ad_Information> adList_Information) {
         this.busInfo = busInfo;
         this.adList_schedules = adList_schedules;
         local = new ArrayList<String>();
@@ -122,6 +117,8 @@ public class AdScheduleManager {
             Network_Access("Get_AD_information", URLEncoder.encode(("AD_local"), "UTF-8") + "=" + URLEncoder.encode(local.get(i), "UTF-8"));//Running Network
             Get_ADData(Network_data, local.get(i));//translate JSonData from Server to Java and Save Data
         }
+
+        Get_file();
         return true;//Working is Success
     }
 
@@ -134,8 +131,9 @@ public class AdScheduleManager {
         int count;
         int time;
         int server_time = -999;
-        AdList_Information temp_adList_Information;
+        Ad_Information temp_adList_Information;
         String ADname;
+        String ADfile;
         int ADnumber_time;
         ArrayList<Integer> tempTime = null;
         AdList_Schedule tmepList = null;
@@ -153,6 +151,8 @@ public class AdScheduleManager {
                 MaxCount = Integer.parseInt(jsonObject1.getString("MaxCount"));
                 count = Integer.parseInt(jsonObject1.getString("count"));
                 ADname = jsonObject1.getString("ADname");
+                ADfile= jsonObject1.getString("ADfile");
+                /////////fileName 추가
                 ////// 광고 정보
 
                 tempTime = new ArrayList<Integer>();
@@ -178,7 +178,7 @@ public class AdScheduleManager {
 
                 if (!System_count.contains(ADnumber)) {
 
-                    temp_adList_Information = new AdList_Information(ADnumber, ADname, MaxCount, count, tempTime, local);
+                    temp_adList_Information = new Ad_Information(ADnumber, ADname, MaxCount, count, tempTime, local, ADfile);
 
                     System.out.println("---------------------" + ADnumber);
                     adList_Information.add(temp_adList_Information);
@@ -215,6 +215,12 @@ public class AdScheduleManager {
 
     }
 
-
+    private void Get_file() {
+        for(int i=0;i<adList_Information.size();i++)
+        {
+            SSH ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298");
+            ssh.execute("SFTP", "folder_server", "folder_device" + adList_Information.get(i).getFileName());
+        }
+    }
 }
 

@@ -3,7 +3,6 @@ package com.example.abaproject;
 import android.content.Intent;
 
 import android.os.Bundle;
-import android.view.SurfaceHolder;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -11,8 +10,6 @@ import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
@@ -28,7 +25,7 @@ public class SubActivity extends AppCompatActivity {
     private AdScheduleManager adScheduleManager;
     private String station_place = null;
     private int adList_num = -1;
-    private ArrayList<AdList_Information> adList_Information = new ArrayList<AdList_Information>();
+    private ArrayList<Ad_Information> adList_Information = new ArrayList<Ad_Information>();
     private ArrayList<AdList_Schedule> adList_schedule = new ArrayList<AdList_Schedule>();
 
     @Override
@@ -71,7 +68,7 @@ public class SubActivity extends AppCompatActivity {
             public void run() {
                 // 반복실행할 구문
                 try {
-                    busStop = new XmlParsing().execute("BusPosition", "379000100", "경남71자1102").get();
+                    busStop = new XmlParsing().execute("BusPosition", "379000100", "경남71자1125").get();
 
                     if (AsyncTaskFinish != 0) {
 
@@ -90,7 +87,7 @@ public class SubActivity extends AppCompatActivity {
         };
 
 
-        timer.schedule(TT, 0, 10000); //Timer 실행
+        timer.schedule(TT, 0, 20000); //Timer 실행
         try {
             while (station_place == null) {
             }
@@ -135,12 +132,13 @@ public class SubActivity extends AppCompatActivity {
 
             try {
                 playAdList  = adList_schedule.get(searchLocal_in_adList());
-            } catch (NullPointerException e) {
+            } catch (ArrayIndexOutOfBoundsException e) {
                 try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e2) {
                     System.out.println("해당지역 광고 없음 ..........");
-                    e2.printStackTrace();
+                    Thread.sleep(10000);
+                    continue;
+                } catch (InterruptedException e2) {
+
                 }
             }
 
@@ -159,7 +157,20 @@ public class SubActivity extends AppCompatActivity {
             ////// 재생
             for (int i = 0; i < this.adList_Information.size(); i++) {
                 //////재생되어야할 광고번호 광고 리스트에서찾기
-                if (playAdList.getAdList_informations(current_time).get(Ad_List_time_count) == this.adList_Information.get(i).getADnumber()) {
+
+                if(playAdList.getAdList_informations(current_time).size() <= 0)
+                {
+                    try {
+                        System.out.println("해당지역 시간 없음 ..........");
+                        Thread.sleep(10000);
+                        continue;
+                    } catch (InterruptedException e2) {
+
+                    }
+                }
+
+
+                else if (playAdList.getAdList_informations(current_time).get(Ad_List_time_count) == this.adList_Information.get(i).getADnumber()) {
                     //this.adList_Information.get(i).getAdvertisingpath();///동영상 경로 // 나중에 살리기
 
                     //////////// play
