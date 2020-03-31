@@ -52,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
         final Intent intent = new Intent(this, SubActivity.class);
 
         button_ok = findViewById(R.id.button);
-        Car_Num = findViewById(R.id.editText2);
-        Bus_Num = findViewById(R.id.editText3);
+        Car_Num = findViewById(R.id.editText2);///
+        Bus_Num = findViewById(R.id.editText3);///
 
         Businfo = new BusInfo();
 
@@ -90,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
                 if (AsyncTaskFinish != 0) {
                     intent.putParcelableArrayListExtra("adList_schedules", adList_schedules);
                     intent.putExtra("Businfo", Businfo);
+                    intent.putExtra("RouteNM", RouteNM);
+                    intent.putExtra("BusName", BusName);
                     startActivity(intent);
                 }
             }

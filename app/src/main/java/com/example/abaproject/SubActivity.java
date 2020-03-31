@@ -35,6 +35,8 @@ public class SubActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         final BusInfo busInfo = (BusInfo) intent.getSerializableExtra("Businfo");
+        final String RouteNM = intent.getExtras().getString("RouteNM");///버스번호
+        final String BusName = intent.getExtras().getString("BusName");///차량번호
 
         adScheduleManager = new AdScheduleManager(busInfo, adList_schedule, adList_Information);
         try {
@@ -68,7 +70,7 @@ public class SubActivity extends AppCompatActivity {
             public void run() {
                 // 반복실행할 구문
                 try {
-                    busStop = new XmlParsing().execute("BusPosition", "379000100", "경남71자1125").get();
+                    busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
 
                     if (AsyncTaskFinish != 0) {
 
@@ -88,17 +90,38 @@ public class SubActivity extends AppCompatActivity {
 
 
         timer.schedule(TT, 0, 20000); //Timer 실행
-        try {
+        /*try {
             while (station_place == null) {
             }
             play_Ad(adList_schedule);
 
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
 
         //  timer.cancel();//타이머 종료
     }
+    public String sortingRouteNM (String RouteNM)
+    {
+
+        if(RouteNM.length() == 1)
+        {
+            return "3790000"+RouteNM+"0";
+        }
+        else if(RouteNM.length() == 2)
+        {
+            return "379000"+RouteNM+"0" ;
+        }
+        else
+        {
+            return "37900"+RouteNM+"0";
+        }
+    }
+
+
+
+
+
 
     public void searching_bus(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedule, int station_id)////////String 까지 받을수 있도록 수정
     {
