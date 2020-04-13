@@ -1,9 +1,6 @@
 package com.example.abaproject;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.os.Environment;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
@@ -17,11 +14,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class SSH extends AsyncTask<String, Void, String> {
     private String hostname;
     private String username;
     private String password;
+
+    private ArrayList<String> FileList;
 
     private JSch jsch;
     private Session session;
@@ -32,10 +32,11 @@ public class SSH extends AsyncTask<String, Void, String> {
     private InputStream inputStream = null;
     private StringBuilder stringBuilder;
 
-    public SSH(String hostname, String username, String password){
+    public SSH(String hostname, String username, String password, ArrayList<String> List){
         this.hostname = hostname;
         this.username = username;
         this.password = password;
+        this.FileList = List;
     }
     @Override
     protected String doInBackground(String... strings) {
@@ -44,6 +45,7 @@ public class SSH extends AsyncTask<String, Void, String> {
         * strings[1](SSH) = command
         * strings[1](SFTP) = Server File Root
         * strings[2](SFTP) = device folder route & File name
+        * FileList = List of file name(download or put to LCD device)
         * */
         jsch = new JSch();
         try {
@@ -54,24 +56,25 @@ public class SSH extends AsyncTask<String, Void, String> {
             session.setConfig(config);
             session.connect();
 
-            switch (strings[0]){
-                case "SSH":
-                    channel = session.openChannel("exec");
-                    channelExec = (ChannelExec)channel;
-                    channelExec.setPty(true);
-                    channelExec.setCommand(strings[1]);//command
+            for(int count = 0; count < FileList.size(); count++) {
+                switch (strings[0]) {
+                    case "SSH":
+                        channel = session.openChannel("exec");
+                        channelExec = (ChannelExec) channel;
+                        channelExec.setPty(true);
+                        channelExec.setCommand(strings[1]+FileList.get(count));//command
 
-                    stringBuilder = new StringBuilder();
-                    inputStream = channel.getInputStream();
-                    ((ChannelExec)channel).getErrStream();
+                        stringBuilder = new StringBuilder();
+                        inputStream = channel.getInputStream();
+                        ((ChannelExec) channel).getErrStream();
 
-                    channel.connect();
+                        channel.connect();
 
-                    if (channel.isClosed()) {
-                        System.out.println("결과");
-                        System.out.println(stringBuilder.toString());
-                        channel.disconnect();
-                    }
+                        if (channel.isClosed()) {
+                            System.out.println("결과");
+                            System.out.println(stringBuilder.toString());
+                            channel.disconnect();
+                        }
                     /*byte[] tmp = new byte[1024];
                     while (true) {
                         while (inputStream.available() > 0) {
@@ -85,22 +88,22 @@ public class SSH extends AsyncTask<String, Void, String> {
                             channel.disconnect();
                         }
                     }*/
-                    break;
-                case "SFTP":
-                    channel = session.openChannel("sftp");
-                    channel.connect();
-                    channelSftp = (ChannelSftp)channel;
-                    channelSftp.cd(strings[1]);//"/var/www/ABA/g5/data/file/free/"
-                    inputStream = channelSftp.get(strings[2]);
+                        break;
+                    case "SFTP":
+                        channel = session.openChannel("sftp");
+                        channel.connect();
+                        channelSftp = (ChannelSftp) channel;
+                        channelSftp.cd(strings[1]);//"/var/www/ABA/g5/data/file/free/"
+                        inputStream = channelSftp.get(strings[2]);//ABAProject
 
-                    fileOutputStream = new FileOutputStream(new File(strings[1]));
-                    int i, downsize = 0;
-                    while((i = inputStream.read()) != -1){
-                        fileOutputStream.write(i);
-                        //downsize += i;
-                        //System.out.println("DownLoaded : " + downsize);
-                    }
-                    break;
+                        fileOutputStream = new FileOutputStream(new File(strings[1]));
+                        int i;
+                        while ((i = inputStream.read()) != -1) {
+                            fileOutputStream.write(i);
+                            //System.out.println("DownLoaded : " + downsize);
+                        }
+                        break;
+                }
             }
         } catch (JSchException e) {
             e.printStackTrace();
