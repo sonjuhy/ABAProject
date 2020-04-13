@@ -11,6 +11,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +31,7 @@ public class SSH extends AsyncTask<String, Void, String> {
     private FileOutputStream fileOutputStream;
     private ChannelSftp channelSftp = null;
     private InputStream inputStream = null;
+    private FileInputStream OutputStream = null;
     private StringBuilder stringBuilder;
 
     public SSH(String hostname, String username, String password, ArrayList<String> List){
@@ -45,6 +47,7 @@ public class SSH extends AsyncTask<String, Void, String> {
         * strings[1](SSH) = command
         * strings[1](SFTP) = Server File Root
         * strings[2](SFTP) = device folder route & File name
+        * SFTP_DownLoad & SFTP_UpLoad is same value
         * FileList = List of file name(download or put to LCD device)
         * */
         jsch = new JSch();
@@ -62,7 +65,12 @@ public class SSH extends AsyncTask<String, Void, String> {
                         channel = session.openChannel("exec");
                         channelExec = (ChannelExec) channel;
                         channelExec.setPty(true);
-                        channelExec.setCommand(strings[1]+FileList.get(count));//command
+                        if(count == 0) {
+                            channelExec.setCommand("export DISPLAY=:0 && " + strings[1]+ " " + FileList.get(count));//command
+                        }
+                        else{
+                            channelExec.setCommand(strings[1]+ " " + FileList.get(count));//command
+                        }
 
                         stringBuilder = new StringBuilder();
                         inputStream = channel.getInputStream();
@@ -70,38 +78,51 @@ public class SSH extends AsyncTask<String, Void, String> {
 
                         channel.connect();
 
-                        if (channel.isClosed()) {
-                            System.out.println("결과");
-                            System.out.println(stringBuilder.toString());
-                            channel.disconnect();
+                        byte[] tmp = new byte[1024];
+                        while(true){
+                            while (inputStream.available() > 0) {
+                                int i = inputStream.read(tmp, 0, 1024);
+                                if(i < 0){
+                                    break;
+                                }
+                                System.out.println(new String(tmp, 0, i));
+                            }
+                            if(channel.isClosed()){
+                                if(inputStream.available() > 0){
+                                    continue;
+                                }
+                                System.out.println("exit-status : "+((ChannelExec) channel).getExitStatus());
+                                break;
+                            }
+                            try{
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    /*byte[] tmp = new byte[1024];
-                    while (true) {
-                        while (inputStream.available() > 0) {
-                            int i = inputStream.read(tmp, 0, 1024);
-                            stringBuilder.append(new String(tmp, 0, i));
-                            if (i < 0) break;
-                        }
-                        if (channel.isClosed()) {
-                            System.out.println("결과");
-                            System.out.println(stringBuilder.toString());
-                            channel.disconnect();
-                        }
-                    }*/
+                        inputStream.close();
                         break;
-                    case "SFTP":
+                    case "SFTP_DownLoad":
                         channel = session.openChannel("sftp");
                         channel.connect();
                         channelSftp = (ChannelSftp) channel;
                         channelSftp.cd(strings[1]);//"/var/www/ABA/g5/data/file/free/"
-                        inputStream = channelSftp.get(strings[2]);//ABAProject
+                        inputStream = channelSftp.get(strings[2]);//filename from server
 
-                        fileOutputStream = new FileOutputStream(new File(strings[1]));
+                        fileOutputStream = new FileOutputStream(new File(strings[1]));//ABAProject with filename
                         int i;
                         while ((i = inputStream.read()) != -1) {
                             fileOutputStream.write(i);
                             //System.out.println("DownLoaded : " + downsize);
                         }
+                        break;
+                    case "SFTP_UpLoad" :
+                        channel = session.openChannel("sftp");
+                        channel.connect();
+                        channelSftp = (ChannelSftp) channel;
+                        channelSftp.cd(strings[1]);//"/var/www/ABA/g5/data/file/free/"
+                        OutputStream = new FileInputStream(new File(strings[1]));//ABAProject with filename
+                        channelSftp.put(OutputStream, FileList.get(count));
                         break;
                 }
             }
@@ -116,6 +137,9 @@ public class SSH extends AsyncTask<String, Void, String> {
             try {
                 fileOutputStream.close();
                 inputStream.close();
+                if("SFTP_UpLoad".equals(strings[1])){
+                    OutputStream.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
