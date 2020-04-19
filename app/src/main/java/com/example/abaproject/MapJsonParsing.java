@@ -16,7 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 
-import static com.example.abaproject.MainActivity.Businfo;
+import static com.example.abaproject.SubActivity.busInfo;
 
 public class MapJsonParsing extends AsyncTask<String, Void, String> {
     private String apikey = "539c81f10377d160a0e0235df1e66207";
@@ -65,7 +65,7 @@ public class MapJsonParsing extends AsyncTask<String, Void, String> {
                 if("B".equals(jsonObject1.getString("region_type"))){
                     StationPlace = jsonObject1.getString("region_3depth_name");
                     //System.out.println("region 3 : " + StationPlace);
-                    Businfo.BusInfo_Output_BusStationList().get(Integer.parseInt(count)).BusStation_Input_KakaoPart(StationPlace);
+                    busInfo.BusInfo_Output_BusStationList().get(Integer.parseInt(count)).BusStation_Input_KakaoPart(StationPlace);
                 }
             }
         } catch (JSONException e) {

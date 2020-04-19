@@ -9,6 +9,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.SftpProgressMonitor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -120,9 +121,34 @@ public class SSH extends AsyncTask<String, Void, String> {
                         channel = session.openChannel("sftp");
                         channel.connect();
                         channelSftp = (ChannelSftp) channel;
-                        channelSftp.cd(strings[1]);//"/var/www/ABA/g5/data/file/free/"
-                        OutputStream = new FileInputStream(new File(strings[1]));//ABAProject with filename
-                        channelSftp.put(OutputStream, FileList.get(count));
+
+                        channelSftp.put(strings[2], strings[1], new SftpProgressMonitor() {
+                            //strings[2] = device route and file name (ex : storage/0/ABAProject/video.mp4)
+                            //strings[1] = server route and file name (ex : /var/www/ABA/g5/Allow_AD/video.mp4)
+                            private long max = 0;
+                            private long count = 0;
+                            private long percent = 0;
+                            @Override
+                            public void init(int i, String s, String s1, long l) {
+                                this.max = l;
+                            }
+
+                            @Override
+                            public boolean count(long bytes) {
+                                this.count += bytes;
+                                long percentNow = this.count*100/max;
+                                if(percentNow>this.percent){
+                                    this.percent = percentNow;
+                                    System.out.println("progress : " + this.percent); // 프로그래스
+                                }
+                                return true;
+                            }
+
+                            @Override
+                            public void end() {
+                                System.out.println("Upload End");
+                            }
+                        });
                         break;
                 }
             }

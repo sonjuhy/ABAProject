@@ -11,7 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import static com.example.abaproject.MainActivity.Businfo;
+import static com.example.abaproject.SubActivity.busInfo;
 import static com.example.abaproject.MainActivity.AsyncTaskFinish;
 /*
 * 사용법
@@ -118,7 +118,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                                 } else if (Getname != null && Getname.equals("STATION_NM")) {
                                     //System.out.println("station_nm : " + GetText);
                                     tmpB.BusStation_Input_BusLocationPart(0, 0, 0, GetText);
-                                    Businfo.BusInfo_Input(0,0, "", tmpB);
+                                    busInfo.BusInfo_Input(0,0, "", tmpB);
                                     tmpB = new BusStationList();
                                 }
                             }
@@ -149,7 +149,7 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                                 //System.out.println("Route ID : " + tmp_RouteID + " Route_NM : " + tmp_RouteNM);
                                 if(tmp_RouteNM != null && tmp_RouteNM.equals(strings[1])) {
                                     System.out.println("Route NM : " + tmp_RouteID + " string[1] : " + strings[1]);
-                                    Businfo.BusInfo_Input(Integer.parseInt(tmp_RouteID), Integer.parseInt(strings[1]), "",null);
+                                    busInfo.BusInfo_Input(Integer.parseInt(tmp_RouteID), Integer.parseInt(strings[1]), "",null);
                                 }
                             }
                         }
@@ -185,9 +185,9 @@ public class XmlParsing extends AsyncTask<String, Void, String> {
                 int stationnm = 0;
                 for(int j=0; j< as.size(); j++) {
                     stationnm = Integer.parseInt(as.get(j).AllStation_Output_StationID());
-                    for (int i = 0; i < Businfo.BusInfo_Output_BusStationList().size(); i++) {
-                        if (Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID() == stationnm) {
-                            Businfo.BusInfo_Output_BusStationList().get(i).BusStation_Input_StationPart(as.get(j).AllStation_Output_X(), as.get(j).AllStation_Output_Y());
+                    for (int i = 0; i < busInfo.BusInfo_Output_BusStationList().size(); i++) {
+                        if (busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID() == stationnm) {
+                            busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Input_StationPart(as.get(j).AllStation_Output_X(), as.get(j).AllStation_Output_Y());
                         }
                     }
                 }

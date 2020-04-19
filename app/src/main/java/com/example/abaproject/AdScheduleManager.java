@@ -218,8 +218,8 @@ public class AdScheduleManager {
     private void Get_file() {
         for(int i=0;i<adList_Information.size();i++)
         {
-            SSH ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298");
-            ssh.execute("SFTP", "folder_server", "folder_device" + adList_Information.get(i).getFileName());
+            //SSH ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298");
+            //ssh.execute("SFTP", "folder_server", "folder_device" + adList_Information.get(i).getFileName());
         }
     }
 }
