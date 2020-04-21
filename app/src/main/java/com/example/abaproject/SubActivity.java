@@ -47,6 +47,8 @@ public class SubActivity extends AppCompatActivity {
     private String folder_server;
     private String filename;
     private String[] command;
+    private boolean AsyncTaskFinish = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,14 +67,8 @@ public class SubActivity extends AppCompatActivity {
         backgroundThread.setRunning(true);
 
         System.out.println("background end");
-/*
-        adScheduleManager = new AdScheduleManager(busInfo, adList_schedule, adList_Information);
-        try {
-            //adScheduleManager.Network_DataArrangement("반지동"); //////////testing
-            adScheduleManager.Network_DataArrangement();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+
+
 
         System.out.println("크기 : " + adList_schedule.size());
 
@@ -87,7 +83,7 @@ public class SubActivity extends AppCompatActivity {
 
             }
         }
-        // System.out.println(adList_Information.get(0).getStationPlace().get(0));
+      //  System.out.println(adList_Information.get(0).getStationPlace().get(0));
         Timer timer = new Timer();
         TimerTask TT = new TimerTask() {
             @Override
@@ -96,7 +92,7 @@ public class SubActivity extends AppCompatActivity {
                 try {
                     busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
 
-                    if (AsyncTaskFinish != 0) {
+                    if (AsyncTaskFinish) {
 
                         searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
                        // station_place = "신월동";/////////--------------test용!
@@ -112,14 +108,14 @@ public class SubActivity extends AppCompatActivity {
             }
         };
         timer.schedule(TT, 0, 20000); //Timer 실행
-        /*try {
+        try {
             while (station_place == null) {
             }
             play_Ad(adList_schedule);
 
         } catch (JSONException e) {
             e.printStackTrace();
-        }*/
+        }
 
         //  timer.cancel();//타이머 종료
     }
@@ -255,11 +251,21 @@ public class SubActivity extends AppCompatActivity {
             /*
              * write here about load AD info list
              * */
+
+           adScheduleManager = new AdScheduleManager(busInfo, adList_schedule, adList_Information);
+            try {
+               // adScheduleManager.Network_DataArrangement("반지동"); //////////testing
+                adScheduleManager.Network_DataArrangement();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+
             if(!("".equals(filename))) {//Download AD video from server
-                //ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", null);
-                // ssh.execute("SFTP", folder_server, folder_device + /////////// test
+                ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", null);
+                ssh.execute("SFTP", folder_server, folder_device);
                 //ssh = new SSH("192.168.0.23","pi","0000",null);
-                //ssh.excute(
+               // ssh.execute("SFTP", folder_server, folder_device);
             }
             /* use here when after make AD info list
             if(!("".equals(filename))){//Send Command to Raspberry Pi(ex : send video, show video etc)
@@ -342,7 +348,7 @@ public class SubActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             progressDialog.dismiss();
-
+            AsyncTaskFinish = true;
             boolean retry = true;
             while (retry) {
                 try {

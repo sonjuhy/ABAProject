@@ -7,8 +7,6 @@ public class Ad_Information {
     private int ADnumber;
     private String name;
 
-
-
     private String fileName;
     private String Advertisingpath; //동영상 경로
     private int MaximumPlays; //최대재생횟수

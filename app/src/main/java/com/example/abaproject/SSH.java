@@ -114,7 +114,7 @@ public class SSH extends AsyncTask<String, Void, String> {
                         int i;
                         while ((i = inputStream.read()) != -1) {
                             fileOutputStream.write(i);
-                            //System.out.println("DownLoaded : " + downsize);
+                           // System.out.println("DownLoaded : " + downsize);
                         }
                         break;
                     case "SFTP_UpLoad" :
