@@ -54,7 +54,7 @@ public class Network extends AsyncTask<String, String, String> implements Serial
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        this.url = "http://sonjuhy.iptime.org/" + arr_String[0] + ".php";
+        this.url = "http://sonjuhy.iptime.org/ABA/ADPHP" + arr_String[0] + ".php";
         System.out.println("onPre Success : " + this.url);
     }
 
