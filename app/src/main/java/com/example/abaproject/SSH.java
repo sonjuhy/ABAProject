@@ -1,5 +1,6 @@
 package com.example.abaproject;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import com.jcraft.jsch.Channel;
@@ -23,7 +24,7 @@ public class SSH extends AsyncTask<String, Void, String> {
     private String username;
     private String password;
 
-    private ArrayList<String> FileList;
+    private ArrayList<Ad_Information> adInformations;
 
     private JSch jsch;
     private Session session;
@@ -34,12 +35,14 @@ public class SSH extends AsyncTask<String, Void, String> {
     private InputStream inputStream = null;
     private FileInputStream OutputStream = null;
     private StringBuilder stringBuilder;
+    private Context context;
 
-    public SSH(String hostname, String username, String password, ArrayList<String> List){
+    public SSH(String hostname, String username, String password, ArrayList<Ad_Information> List, Context context){
         this.hostname = hostname;
         this.username = username;
         this.password = password;
-        this.FileList = List;
+        this.adInformations = List;
+        this.context = context;
     }
     @Override
     protected String doInBackground(String... strings) {
@@ -59,18 +62,17 @@ public class SSH extends AsyncTask<String, Void, String> {
             config.put("StrictHostKeyChecking","no");
             session.setConfig(config);
             session.connect();
-
-            for(int count = 0; count < FileList.size(); count++) {
+            for(int count = 0; count < adInformations.size(); count++) {
                 switch (strings[0]) {
                     case "SSH":
                         channel = session.openChannel("exec");
                         channelExec = (ChannelExec) channel;
                         channelExec.setPty(true);
                         if(count == 0) {
-                            channelExec.setCommand("export DISPLAY=:0 && " + strings[1]+ " " + FileList.get(count));//command
+                            channelExec.setCommand("export DISPLAY=:0 && " + strings[1]+ " " + adInformations.get(count).getFileName());//command
                         }
                         else{
-                            channelExec.setCommand(strings[1]+ " " + FileList.get(count));//command
+                            channelExec.setCommand(strings[1]+ " " + adInformations.get(count).getFileName());//command
                         }
 
                         stringBuilder = new StringBuilder();
@@ -104,18 +106,25 @@ public class SSH extends AsyncTask<String, Void, String> {
                         inputStream.close();
                         break;
                     case "SFTP_DownLoad":
+                        System.out.println(adInformations.get(count).getFileName()+"~~~~~~~~~~~~~~~~~");
                         channel = session.openChannel("sftp");
                         channel.connect();
                         channelSftp = (ChannelSftp) channel;
                         channelSftp.cd(strings[1]);//"/var/www/ABA/g5/data/file/free/"
-                        inputStream = channelSftp.get(strings[2]);//filename from server
+                        inputStream = channelSftp.get(adInformations.get(count).getFileName());//filename from server
 
-                        fileOutputStream = new FileOutputStream(new File(strings[1]));//ABAProject with filename
+                        File file = new File(context.getFilesDir(),adInformations.get(count).getFileName());
+                        if(!file.exists())
+                        {
+                            file.createNewFile();
+                        }
+                        fileOutputStream = new FileOutputStream(file);//ABAProject with filename
                         int i;
                         while ((i = inputStream.read()) != -1) {
                             fileOutputStream.write(i);
                            // System.out.println("DownLoaded : " + downsize);
                         }
+
                         break;
                     case "SFTP_UpLoad" :
                         channel = session.openChannel("sftp");

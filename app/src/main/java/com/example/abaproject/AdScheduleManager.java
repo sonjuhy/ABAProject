@@ -114,6 +114,7 @@ public class AdScheduleManager {
 
         local_information_storage();
         for (int i = 0; i < local.size(); i++) {
+            System.out.println("test :" +local.get(i));
             Network_Access("Get_AD_information", URLEncoder.encode(("AD_local"), "UTF-8") + "=" + URLEncoder.encode(local.get(i), "UTF-8"));//Running Network
             Get_ADData(Network_data, local.get(i));//translate JSonData from Server to Java and Save Data
         }

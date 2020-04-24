@@ -1,6 +1,7 @@
 package com.example.abaproject;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 
 import android.os.AsyncTask;
@@ -44,15 +45,15 @@ public class SubActivity extends AppCompatActivity {
 
     private String Local_Path;
     private String folder_device;
-    private String folder_server;
+    private String folder_server = "/websites/ssl/www/ABA/data/file/Allow_AD";
     private String filename;
     private String[] command;
     private boolean AsyncTaskFinish = false;
-
+    Context context;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        context = this.getApplicationContext();
         Intent intent = getIntent();
 
         RouteNM = intent.getExtras().getString("RouteNM");///버스번호
@@ -107,7 +108,7 @@ public class SubActivity extends AppCompatActivity {
                 }
             }
         };
-        timer.schedule(TT, 0, 20000); //Timer 실행
+        timer.schedule(TT, 0, 5000); //Timer 실행
         try {
             while (station_place == null) {
             }
@@ -154,6 +155,7 @@ public class SubActivity extends AppCompatActivity {
         int temp = 0;
         int start_time = adScheduleManager.getServer_time();
         AdList_Schedule playAdList=null;
+
 
         while (station_place != null) {
             try {
@@ -262,8 +264,8 @@ public class SubActivity extends AppCompatActivity {
 
 
             if(!("".equals(filename))) {//Download AD video from server
-                ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", null);
-                ssh.execute("SFTP", folder_server, folder_device);
+                ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", adList_Information, context);
+                ssh.execute("SFTP_DownLoad", folder_server);
                 //ssh = new SSH("192.168.0.23","pi","0000",null);
                // ssh.execute("SFTP", folder_server, folder_device);
             }
