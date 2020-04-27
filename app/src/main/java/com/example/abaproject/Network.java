@@ -2,6 +2,7 @@ package com.example.abaproject;
 
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -92,7 +93,9 @@ public class Network extends AsyncTask<String, String, String> implements Serial
 
             int responseStatusCode = httpURLConnection.getResponseCode();
 
+            System.out.println("response code : "+responseStatusCode);
             if (responseStatusCode == HttpURLConnection.HTTP_OK) {
+                Log.v("network respons","work switch");
                 String set = "string";
                 switch (set) {/////////strings[0]
 
@@ -153,7 +156,7 @@ public class Network extends AsyncTask<String, String, String> implements Serial
 
             else {
                 inputStream = httpURLConnection.getErrorStream();
-                System.out.println("Response Failed");
+                System.out.println("Response Failed : " + inputStream);
             }
 
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");

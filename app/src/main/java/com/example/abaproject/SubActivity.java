@@ -110,14 +110,14 @@ public class SubActivity extends AppCompatActivity {
             }
         };
         timer.schedule(TT, 0, 5000); //Timer 실행
-        try {
+        /*try {
             while (station_place == null) {
             }
             play_Ad(adList_schedule);
 
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
 
         //  timer.cancel();//타이머 종료
     }
@@ -255,21 +255,25 @@ public class SubActivity extends AppCompatActivity {
              * write here about load AD info list
              * */
 
-           adScheduleManager = new AdScheduleManager(busInfo, adList_schedule, adList_Information);
+          /* adScheduleManager = new AdScheduleManager(busInfo, adList_schedule, adList_Information);
             try {
                // adScheduleManager.Network_DataArrangement("반지동"); //////////testing
                 adScheduleManager.Network_DataArrangement();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
-            }
+            }*/
 
 
-            if(!("".equals(filename))) {//Download AD video from server
+            //if(!("".equals(filename))) {//Download AD video from server
+                System.out.println("Download start");
+                //ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", adList_Information, context);
+                //ssh.execute("SFTP_DownLoad", folder_server,folder_device);
+
                 ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", adList_Information, context);
-                ssh.execute("SFTP_DownLoad", folder_server);
+                ssh.execute("SFTP_UpLoad",folder_server,folder_device);
                 //ssh = new SSH("192.168.0.23","pi","0000",null);
                // ssh.execute("SFTP", folder_server, folder_device);
-            }
+            //}
             /* use here when after make AD info list
             if(!("".equals(filename))){//Send Command to Raspberry Pi(ex : send video, show video etc)
                 ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298");
@@ -287,6 +291,7 @@ public class SubActivity extends AppCompatActivity {
                     running = false;
                 handler.sendMessage(handler.obtainMessage());
             }
+            System.out.println("Thread run is over");
         }
 
         private boolean BusRoute_Load(String RouteNM) {

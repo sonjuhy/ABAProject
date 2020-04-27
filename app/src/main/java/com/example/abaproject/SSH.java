@@ -62,7 +62,8 @@ public class SSH extends AsyncTask<String, Void, String> {
             config.put("StrictHostKeyChecking","no");
             session.setConfig(config);
             session.connect();
-            for(int count = 0; count < adInformations.size(); count++) {
+            //for(int count = 0; count < adInformations.size(); count++) {
+            for(int count = 0; count < 1; count++) {
                 switch (strings[0]) {
                     case "SSH":
                         channel = session.openChannel("exec");
@@ -106,19 +107,21 @@ public class SSH extends AsyncTask<String, Void, String> {
                         inputStream.close();
                         break;
                     case "SFTP_DownLoad":
-                        System.out.println(adInformations.get(count).getFileName()+"~~~~~~~~~~~~~~~~~");
+                        //System.out.println(adInformations.get(count).getFileName()+"~~~~~~~~~~~~~~~~~");
                         channel = session.openChannel("sftp");
                         channel.connect();
                         channelSftp = (ChannelSftp) channel;
                         channelSftp.cd(strings[1]);//"/var/www/ABA/g5/data/file/free/"
-                        inputStream = channelSftp.get(adInformations.get(count).getFileName());//filename from server
+                        inputStream = channelSftp.get("earthvideo.mp4");
+                        //inputStream = channelSftp.get(adInformations.get(count).getFileName());//filename from server
 
-                        File file = new File(context.getFilesDir(),adInformations.get(count).getFileName());
+                        /*File file = new File(context.getFilesDir(),adInformations.get(count).getFileName());
                         if(!file.exists())
                         {
                             file.createNewFile();
                         }
-                        fileOutputStream = new FileOutputStream(file);//ABAProject with filename
+                        fileOutputStream = new FileOutputStream(file);*///ABAProject with filename
+                        fileOutputStream = new FileOutputStream(new File(strings[2]+"earthvideo.mp4"));
                         int i;
                         while ((i = inputStream.read()) != -1) {
                             fileOutputStream.write(i);
@@ -131,7 +134,8 @@ public class SSH extends AsyncTask<String, Void, String> {
                         channel.connect();
                         channelSftp = (ChannelSftp) channel;
 
-                        channelSftp.put(strings[2], strings[1], new SftpProgressMonitor() {
+                        //channelSftp.put(strings[2], strings[1], new SftpProgressMonitor() {
+                        channelSftp.put(strings[2]+"/earthvideo.mp4", "/home/sonjuhy/earthvideo.mp4", new SftpProgressMonitor() {
                             //strings[2] = device route and file name (ex : storage/0/ABAProject/video.mp4)
                             //strings[1] = server route and file name (ex : /var/www/ABA/g5/Allow_AD/video.mp4)
                             private long max = 0;
@@ -169,15 +173,15 @@ public class SSH extends AsyncTask<String, Void, String> {
             e.printStackTrace();
         }
         finally {
-            try {
-                fileOutputStream.close();
+            /*try {
+               // fileOutputStream.close();
                 inputStream.close();
                 if("SFTP_UpLoad".equals(strings[1])){
                     OutputStream.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
         }
         System.out.println("finish");
 
