@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         adList_schedules = new ArrayList<AdList_Schedule>();
-        final Intent intent = new Intent(this, SubActivity.class);
+
 
         button_ok = findViewById(R.id.button);
         Car_Num = findViewById(R.id.editText2);///
@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         button_ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SubActivity.class);
                 RouteNM = Bus_Num.getText().toString();
                 BusName = Car_Num.getText().toString();
                 System.out.println("RouteNM / BusName : "+RouteNM +" / " + BusName);
@@ -67,7 +68,9 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("RouteNM", RouteNM);
                 intent.putExtra("BusName", BusName);
                 intent.putExtra("fileRoute", folder_device);
+
                 startActivity(intent);
+                finish();
             }
         });
     }

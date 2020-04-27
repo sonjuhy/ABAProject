@@ -53,6 +53,7 @@ public class SubActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sub);
         context = this.getApplicationContext();
         Intent intent = getIntent();
 
