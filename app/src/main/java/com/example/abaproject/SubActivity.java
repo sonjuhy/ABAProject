@@ -96,7 +96,7 @@ public class SubActivity extends AppCompatActivity {
 
                     if (AsyncTaskFinish) {
 
-                        searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
+               //         searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
                        // station_place = "신월동";/////////--------------test용!
                         System.out.println("time per 30's___station_place : " + station_place);
                     }
@@ -110,12 +110,12 @@ public class SubActivity extends AppCompatActivity {
             }
         };
         timer.schedule(TT, 0, 5000); //Timer 실행
-        /*try {
-            while (station_place == null) {
-            }
+
+       /* try {
+            backgroundThread.join();
             play_Ad(adList_schedule);
 
-        } catch (JSONException e) {
+        } catch (JSONException | InterruptedException e) {
             e.printStackTrace();
         }*/
 
@@ -269,8 +269,8 @@ public class SubActivity extends AppCompatActivity {
                 //ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", adList_Information, context);
                 //ssh.execute("SFTP_DownLoad", folder_server,folder_device);
 
-                ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", adList_Information, context);
-                ssh.execute("SFTP_UpLoad",folder_server,folder_device);
+                //ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", adList_Information, context);
+                //ssh.execute("SFTP_UpLoad",folder_server,folder_device);
                 //ssh = new SSH("192.168.0.23","pi","0000",null);
                // ssh.execute("SFTP", folder_server, folder_device);
             //}
@@ -368,6 +368,20 @@ public class SubActivity extends AppCompatActivity {
                 Log.v("handler","finish");
                 Toast.makeText(SubActivity.this, "Finish", Toast.LENGTH_LONG).show();
             }
+            Timer timer = new Timer();
+            TimerTask TT = new TimerTask() {
+                @Override
+                public void run() {
+                    // 반복실행할 구문
+                            System.out.println("timee");
+
+                }
+            };
+            timer.schedule(TT, 0, 1000); //Timer 실행
+
+
+
+
         }
     };
 }
