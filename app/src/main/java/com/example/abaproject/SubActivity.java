@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,6 +53,7 @@ public class SubActivity extends AppCompatActivity {
     private String[] command;
     private boolean AsyncTaskFinish = false;
     Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,14 +66,13 @@ public class SubActivity extends AppCompatActivity {
         folder_device = intent.getExtras().getString("fileRoute");//어플(동영상다운로드용) 폴더
 
         busInfo = new BusInfo();
-        busInfo.BusInfo_Input(0,Integer.parseInt(RouteNM), BusName,null);
+        busInfo.BusInfo_Input(0, Integer.parseInt(RouteNM), BusName, null);
 
-        progressDialog = ProgressDialog.show(SubActivity.this, "Loading...","Wait Please");
+        progressDialog = ProgressDialog.show(SubActivity.this, "Loading...", "Wait Please");
         backgroundThread = new BackgroundThread();
         backgroundThread.setRunning(true);
 
         System.out.println("background end");
-
 
 
         System.out.println("크기 : " + adList_schedule.size());
@@ -85,9 +88,10 @@ public class SubActivity extends AppCompatActivity {
 
             }
         }
-      //  System.out.println(adList_Information.get(0).getStationPlace().get(0));
-        Timer timer = new Timer();
-        TimerTask TT = new TimerTask() {
+        //  System.out.println(adList_Information.get(0).getStationPlace().get(0));
+
+        final Timer timer = new Timer();
+        final TimerTask TT = new TimerTask() {
             @Override
             public void run() {
                 // 반복실행할 구문
@@ -96,8 +100,11 @@ public class SubActivity extends AppCompatActivity {
 
                     if (AsyncTaskFinish) {
 
-               //         searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
-                       // station_place = "신월동";/////////--------------test용!
+                        searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
+                        //station_place = "신월동";/////////--------------test용!
+
+                        handlerText.sendMessage(handlerText.obtainMessage());
+
                         System.out.println("time per 30's___station_place : " + station_place);
                     }
 
@@ -106,40 +113,56 @@ public class SubActivity extends AppCompatActivity {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                }catch (NumberFormatException e) {
+                    System.out.println("버스운행 종료");
+                    e.printStackTrace();
+                    station_place = null;
+                    timer.cancel();//타이머 종료
+                    Intent intent=new Intent(SubActivity.this,MainActivity.class);
+                    startActivity(intent);
+                    Toast.makeText(SubActivity.this, "잘못된 입력입니다.", Toast.LENGTH_LONG).show();
+                    finish();
                 }
+
             }
         };
-        timer.schedule(TT, 0, 5000); //Timer 실행
 
-       /* try {
-            backgroundThread.join();
-            play_Ad(adList_schedule);
 
-        } catch (JSONException | InterruptedException e) {
-            e.printStackTrace();
-        }*/
+        Button button = findViewById(R.id.button2);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+
+                    timer.schedule(TT, 0, 5000); //Timer 실행
+                    play_Ad(adList_schedule);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
 
         //  timer.cancel();//타이머 종료
     }
-    public String sortingRouteNM (String RouteNM)
-    {
-        if(RouteNM.length() == 1) {
-            return "3790000"+RouteNM+"0";
-        }
-        else if(RouteNM.length() == 2) {
-            return "379000"+RouteNM+"0" ;
-        }
-        else {
-            return "37900"+RouteNM+"0";
+
+    public String sortingRouteNM(String RouteNM) {
+        if (RouteNM.length() == 1) {
+            return "3790000" + RouteNM + "0";
+        } else if (RouteNM.length() == 2) {
+            return "379000" + RouteNM + "0";
+        } else {
+            return "37900" + RouteNM + "0";
         }
     }
+
     public void searching_bus(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedule, int station_id)////////String 까지 받을수 있도록 수정
     {
         for (int i = 0; i < busInfo.BusInfo_Output_BusStationList().size(); i++) {
             // System.out.println(station_id);
             // System.out.println(busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID());
             if (busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID() == station_id) {
-
 
                 station_place = busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationPlace();
 
@@ -155,15 +178,18 @@ public class SubActivity extends AppCompatActivity {
         int current_time = -999;
         int temp = 0;
         int start_time = adScheduleManager.getServer_time();
-        AdList_Schedule playAdList=null;
+        AdList_Schedule playAdList = null;
+
 
 
         while (station_place != null) {
             try {
-                playAdList  = adList_schedule.get(searchLocal_in_adList());
+                playAdList = adList_schedule.get(searchLocal_in_adList());
             } catch (ArrayIndexOutOfBoundsException e) {
                 try {
                     System.out.println("해당지역 광고 없음 ..........");
+                    //TextView textView2 = (TextView)findViewById(R.id.AdText);
+                    //textView2.setText("광고 없음");
                     Thread.sleep(10000);
                     continue;
                 } catch (InterruptedException e2) {
@@ -186,19 +212,22 @@ public class SubActivity extends AppCompatActivity {
             ////// 재생
             for (int i = 0; i < this.adList_Information.size(); i++) {
                 //////재생되어야할 광고번호 광고 리스트에서찾기
-                if(playAdList.getAdList_informations(current_time).size() <= 0)
-                {
+                if (playAdList.getAdList_informations(current_time).size() <= 0) {
                     try {
                         System.out.println("해당지역 시간 없음 ..........");
+                        //TextView textView3 = (TextView)findViewById(R.id.AdText);
+                        //textView3.setText("광고 없음");
                         Thread.sleep(10000);
                         continue;
                     } catch (InterruptedException e2) {
 
                     }
-                }
-                else if (playAdList.getAdList_informations(current_time).get(Ad_List_time_count) == this.adList_Information.get(i).getADnumber()) {
+                } else if (playAdList.getAdList_informations(current_time).get(Ad_List_time_count) == this.adList_Information.get(i).getADnumber()) {
                     //this.adList_Information.get(i).getAdvertisingpath();///동영상 경로 // 나중에 살리기
-
+                   //TextView textView4 = (TextView)findViewById(R.id.AdText);
+                   //textView4.setText(this.adList_Information.get(i).getName());
+                    ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
+                    ssh.execute("SSH", "command", this.adList_Information.get(i).getFileName());
                     //////////// play
                     try {
                         Thread.sleep(3000);
@@ -219,6 +248,7 @@ public class SubActivity extends AppCompatActivity {
             }
         }
     }
+
     public int searchLocal_in_adList()////////String 까지 받을수 있도록 수정
     {
         for (int i = 0; i < adList_schedule.size(); i++) {
@@ -241,7 +271,7 @@ public class SubActivity extends AppCompatActivity {
         @Override
         public void run() {
             super.run();
-            Log.v("background thread","run() is start");
+            Log.v("background thread", "run() is start");
             String filename = null;
             BusRoute_Load(RouteNM);
             System.out.println("BusRoute Load End");
@@ -255,24 +285,24 @@ public class SubActivity extends AppCompatActivity {
              * write here about load AD info list
              * */
 
-          /* adScheduleManager = new AdScheduleManager(busInfo, adList_schedule, adList_Information);
+            adScheduleManager = new AdScheduleManager(busInfo, adList_schedule, adList_Information);
             try {
-               // adScheduleManager.Network_DataArrangement("반지동"); //////////testing
+                // adScheduleManager.Network_DataArrangement("반지동"); //////////testing
                 adScheduleManager.Network_DataArrangement();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
-            }*/
+            }
 
 
             //if(!("".equals(filename))) {//Download AD video from server
-                System.out.println("Download start");
-                //ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", adList_Information, context);
-                //ssh.execute("SFTP_DownLoad", folder_server,folder_device);
+            System.out.println("Download start");
+            ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
+            ssh.execute("SFTP_DownLoad", folder_server, folder_device);
 
-                //ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", adList_Information, context);
-                //ssh.execute("SFTP_UpLoad",folder_server,folder_device);
-                //ssh = new SSH("192.168.0.23","pi","0000",null);
-               // ssh.execute("SFTP", folder_server, folder_device);
+            //ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", adList_Information, context);
+            //ssh.execute("SFTP_UpLoad",folder_server,folder_device);
+            //ssh = new SSH("192.168.0.23","pi","0000",null);
+            // ssh.execute("SFTP", folder_server, folder_device);
             //}
             /* use here when after make AD info list
             if(!("".equals(filename))){//Send Command to Raspberry Pi(ex : send video, show video etc)
@@ -365,23 +395,17 @@ public class SubActivity extends AppCompatActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                Log.v("handler","finish");
+                Log.v("handler", "finish");
                 Toast.makeText(SubActivity.this, "Finish", Toast.LENGTH_LONG).show();
             }
-            Timer timer = new Timer();
-            TimerTask TT = new TimerTask() {
-                @Override
-                public void run() {
-                    // 반복실행할 구문
-                            System.out.println("timee");
-
-                }
-            };
-            timer.schedule(TT, 0, 1000); //Timer 실행
-
-
-
-
         }
     };
+    Handler handlerText = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            TextView textView = (TextView)findViewById(R.id.CurrentLocation);
+            textView.setText(station_place);
+        }
+    };
+
 }

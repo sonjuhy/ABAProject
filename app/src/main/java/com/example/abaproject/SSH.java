@@ -37,82 +37,86 @@ public class SSH extends AsyncTask<String, Void, String> {
     private StringBuilder stringBuilder;
     private Context context;
 
-    public SSH(String hostname, String username, String password, ArrayList<Ad_Information> List, Context context){
+    public SSH(String hostname, String username, String password, ArrayList<Ad_Information> List, Context context) {
         this.hostname = hostname;
         this.username = username;
         this.password = password;
         this.adInformations = List;
         this.context = context;
     }
+
     @Override
     protected String doInBackground(String... strings) {
         /*
-        * strings[0] = mode
-        * strings[1](SSH) = command
-        * strings[1](SFTP) = Server File Root
-        * strings[2](SFTP) = device folder route & File name
-        * SFTP_DownLoad & SFTP_UpLoad is same value
-        * FileList = List of file name(download or put to LCD device)
-        * */
+         * strings[0] = mode
+         * strings[1](SSH) = command
+         * strings[1](SFTP) = Server File Root
+         * strings[2](SFTP) = device folder route & File name
+         * SFTP_DownLoad & SFTP_UpLoad is same value
+         * FileList = List of file name(download or put to LCD device)
+         * */
         jsch = new JSch();
         try {
             session = jsch.getSession(username, hostname, 22);
             session.setPassword(password);
             java.util.Properties config = new java.util.Properties();
-            config.put("StrictHostKeyChecking","no");
+            config.put("StrictHostKeyChecking", "no");
             session.setConfig(config);
             session.connect();
-            //for(int count = 0; count < adInformations.size(); count++) {
-            for(int count = 0; count < 1; count++) {
-                switch (strings[0]) {
-                    case "SSH":
-                        channel = session.openChannel("exec");
-                        channelExec = (ChannelExec) channel;
-                        channelExec.setPty(true);
-                        if(count == 0) {
-                            channelExec.setCommand("export DISPLAY=:0 && " + strings[1]+ " " + adInformations.get(count).getFileName());//command
-                        }
-                        else{
-                            channelExec.setCommand(strings[1]+ " " + adInformations.get(count).getFileName());//command
-                        }
 
-                        stringBuilder = new StringBuilder();
-                        inputStream = channel.getInputStream();
-                        ((ChannelExec) channel).getErrStream();
+            // for(int count = 0; count < 1; count++) {
+            switch (strings[0]) {
+                case "SSH":
+                    channel = session.openChannel("exec");
+                    channelExec = (ChannelExec) channel;
+                    channelExec.setPty(true);
+                    // if (count == 0) {
+                    channelExec.setCommand("export DISPLAY=:0 && " + strings[1] + " " + strings[2]);//command
+                    //   } else {
+                    //       channelExec.setCommand(strings[1] + " " + strings[2]);//command
+                    //  }
 
-                        channel.connect();
+                    stringBuilder = new StringBuilder();
+                    inputStream = channel.getInputStream();
+                    ((ChannelExec) channel).getErrStream();
 
-                        byte[] tmp = new byte[1024];
-                        while(true){
-                            while (inputStream.available() > 0) {
-                                int i = inputStream.read(tmp, 0, 1024);
-                                if(i < 0){
-                                    break;
-                                }
-                                System.out.println(new String(tmp, 0, i));
-                            }
-                            if(channel.isClosed()){
-                                if(inputStream.available() > 0){
-                                    continue;
-                                }
-                                System.out.println("exit-status : "+((ChannelExec) channel).getExitStatus());
+                    channel.connect();
+
+                    byte[] tmp = new byte[1024];
+                    while (true) {
+                        while (inputStream.available() > 0) {
+                            int i = inputStream.read(tmp, 0, 1024);
+                            if (i < 0) {
                                 break;
                             }
-                            try{
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+                            System.out.println(new String(tmp, 0, i));
                         }
-                        inputStream.close();
-                        break;
-                    case "SFTP_DownLoad":
+                        if (channel.isClosed()) {
+                            if (inputStream.available() > 0) {
+                                continue;
+                            }
+                            System.out.println("exit-status : " + ((ChannelExec) channel).getExitStatus());
+                            break;
+                        }
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    inputStream.close();
+                    break;
+
+                case "SFTP_DownLoad":
+                    for (int count = 0; count < adInformations.size(); count++) {
                         //System.out.println(adInformations.get(count).getFileName()+"~~~~~~~~~~~~~~~~~");
                         channel = session.openChannel("sftp");
                         channel.connect();
                         channelSftp = (ChannelSftp) channel;
                         channelSftp.cd(strings[1]);//"/var/www/ABA/g5/data/file/free/"
                         inputStream = channelSftp.get("earthvideo.mp4");
+
+
                         //inputStream = channelSftp.get(adInformations.get(count).getFileName());//filename from server
 
                         /*File file = new File(context.getFilesDir(),adInformations.get(count).getFileName());
@@ -121,26 +125,29 @@ public class SSH extends AsyncTask<String, Void, String> {
                             file.createNewFile();
                         }
                         fileOutputStream = new FileOutputStream(file);*///ABAProject with filename
-                        fileOutputStream = new FileOutputStream(new File(strings[2]+"earthvideo.mp4"));
+                        fileOutputStream = new FileOutputStream(new File(strings[2] + "earthvideo.mp4"));
                         int i;
                         while ((i = inputStream.read()) != -1) {
                             fileOutputStream.write(i);
-                           // System.out.println("DownLoaded : " + downsize);
+                            // System.out.println("DownLoaded : " + downsize);
                         }
+                    }
+                    break;
 
-                        break;
-                    case "SFTP_UpLoad" :
+                case "SFTP_UpLoad":
+                    for (int count = 0; count < adInformations.size(); count++) {
                         channel = session.openChannel("sftp");
                         channel.connect();
                         channelSftp = (ChannelSftp) channel;
 
                         //channelSftp.put(strings[2], strings[1], new SftpProgressMonitor() {
-                        channelSftp.put(strings[2]+"/earthvideo.mp4", "/home/sonjuhy/earthvideo.mp4", new SftpProgressMonitor() {
+                        channelSftp.put(strings[2] + "/earthvideo.mp4", "/home/sonjuhy/earthvideo.mp4", new SftpProgressMonitor() {
                             //strings[2] = device route and file name (ex : storage/0/ABAProject/video.mp4)
                             //strings[1] = server route and file name (ex : /var/www/ABA/g5/Allow_AD/video.mp4)
                             private long max = 0;
                             private long count = 0;
                             private long percent = 0;
+
                             @Override
                             public void init(int i, String s, String s1, long l) {
                                 this.max = l;
@@ -149,8 +156,8 @@ public class SSH extends AsyncTask<String, Void, String> {
                             @Override
                             public boolean count(long bytes) {
                                 this.count += bytes;
-                                long percentNow = this.count*100/max;
-                                if(percentNow>this.percent){
+                                long percentNow = this.count * 100 / max;
+                                if (percentNow > this.percent) {
                                     this.percent = percentNow;
                                     System.out.println("progress : " + this.percent); // 프로그래스
                                 }
@@ -162,8 +169,9 @@ public class SSH extends AsyncTask<String, Void, String> {
                                 System.out.println("Upload End");
                             }
                         });
-                        break;
-                }
+                    }
+                    break;
+
             }
         } catch (JSchException e) {
             e.printStackTrace();
@@ -171,8 +179,7 @@ public class SSH extends AsyncTask<String, Void, String> {
             e.printStackTrace();
         } catch (SftpException e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             /*try {
                // fileOutputStream.close();
                 inputStream.close();
@@ -183,7 +190,7 @@ public class SSH extends AsyncTask<String, Void, String> {
                 e.printStackTrace();
             }*/
         }
-        System.out.println("finish");
+        System.out.println("ssh finish");
 
         return null;
     }

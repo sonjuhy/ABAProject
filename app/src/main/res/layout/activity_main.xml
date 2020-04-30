@@ -63,14 +63,14 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="text"
+        android:privateImeOptions="defaultInputmode=korean"
         android:singleLine="true"
         android:text=""
-        android:privateImeOptions="defaultInputmode=korean"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.22" />
+        app:layout_constraintVertical_bias="0.223" />
 
     <EditText
         android:id="@+id/editText3"
