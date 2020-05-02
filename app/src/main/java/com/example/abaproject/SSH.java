@@ -108,14 +108,14 @@ public class SSH extends AsyncTask<String, Void, String> {
                     break;
 
                 case "SFTP_DownLoad":
-                    for (int count = 0; count < adInformations.size(); count++) {
+                   // for (int count = 0; count < adInformations.size(); count++) {
                         //System.out.println(adInformations.get(count).getFileName()+"~~~~~~~~~~~~~~~~~");
                         channel = session.openChannel("sftp");
                         channel.connect();
                         channelSftp = (ChannelSftp) channel;
                         channelSftp.cd(strings[1]);//"/var/www/ABA/g5/data/file/free/"
                         inputStream = channelSftp.get("earthvideo.mp4");
-
+                    System.out.println("Download start");
 
                         //inputStream = channelSftp.get(adInformations.get(count).getFileName());//filename from server
 
@@ -129,8 +129,7 @@ public class SSH extends AsyncTask<String, Void, String> {
                         int i;
                         while ((i = inputStream.read()) != -1) {
                             fileOutputStream.write(i);
-                            // System.out.println("DownLoaded : " + downsize);
-                        }
+                      //  }
                     }
                     break;
 
@@ -141,7 +140,9 @@ public class SSH extends AsyncTask<String, Void, String> {
                         channelSftp = (ChannelSftp) channel;
 
                         //channelSftp.put(strings[2], strings[1], new SftpProgressMonitor() {
-                        channelSftp.put(strings[2] + "/earthvideo.mp4", "/home/sonjuhy/earthvideo.mp4", new SftpProgressMonitor() {
+
+                        channelSftp.put(strings[2] + "/earthvideo.mp4", "/home/ABA/earthvideo.mp4", new SftpProgressMonitor() {
+
                             //strings[2] = device route and file name (ex : storage/0/ABAProject/video.mp4)
                             //strings[1] = server route and file name (ex : /var/www/ABA/g5/Allow_AD/video.mp4)
                             private long max = 0;

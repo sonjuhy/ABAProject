@@ -98,7 +98,7 @@ public class SubActivity extends AppCompatActivity {
 
                     if (AsyncTaskFinish) {
 
-                        searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
+                        //searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
                         //station_place = "신월동";/////////--------------test용!
 
                         handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
@@ -128,7 +128,8 @@ public class SubActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
+                timer.schedule(TT, 0, 5000); //Timer 실행
+             /*   try {
 
                     timer.schedule(TT, 0, 5000); //Timer 실행
                     play_Ad(adList_schedule);
@@ -136,7 +137,7 @@ public class SubActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
+*/
             }
         });
         Button finshButton = findViewById(R.id.finshButton);
@@ -152,9 +153,10 @@ public class SubActivity extends AppCompatActivity {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                
+
                 timer.cancel();//타이머 종료
-                finish();;
+                Intent intent=new Intent(SubActivity.this,MainActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -314,14 +316,13 @@ public class SubActivity extends AppCompatActivity {
 
 
             //if(!("".equals(filename))) {//Download AD video from server
-            System.out.println("Download start");
+
             ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
             ssh.execute("SFTP_DownLoad", folder_server, folder_device);
 
-            //ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298", adList_Information, context);
-            //ssh.execute("SFTP_UpLoad",folder_server,folder_device);
-            //ssh = new SSH("192.168.0.23","pi","0000",null);
-            // ssh.execute("SFTP", folder_server, folder_device);
+           // ssh = new SSH("61.105.130.110","pi","admin", adList_Information, context);
+           // ssh.execute("SFTP_UpLoad",folder_server,folder_device);
+
             //}
             /* use here when after make AD info list
             if(!("".equals(filename))){//Send Command to Raspberry Pi(ex : send video, show video etc)
