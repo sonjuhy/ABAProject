@@ -42,7 +42,8 @@ public class SubActivity extends AppCompatActivity {
     private MapJsonParsing mapJsonParsing;
     private String RouteNM, BusName;
     private SSH ssh;//for ssh connect and sftp connect
-    private boolean threadcheck = false;
+    private SSH sshup;//for ssh connect and sftp connect
+    private String threadcheck = null;
 
     private String Local_Path;
     private String folder_device;
@@ -320,8 +321,15 @@ public class SubActivity extends AppCompatActivity {
             ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
             ssh.execute("SFTP_DownLoad", folder_server, folder_device);
 
-           // ssh = new SSH("61.105.130.110","pi","admin", adList_Information, context);
-           // ssh.execute("SFTP_UpLoad",folder_server,folder_device);
+
+            sshup = new SSH("61.105.130.110","pi","admin", adList_Information, context);
+            try {
+                threadcheck = sshup.execute("SFTP_UpLoad",folder_server,folder_device).get();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             //}
             /* use here when after make AD info list
@@ -330,17 +338,14 @@ public class SubActivity extends AppCompatActivity {
                 ssh.execute("SSH", command[0]);
             }
             */
-            threadcheck = true;
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             while (running) {
-                if (threadcheck == true)
+                if (threadcheck.equals("finsh"))
                     running = false;
                 handler.sendMessage(handler.obtainMessage());
             }
+
+
+
             System.out.println("Thread run is over");
         }
 

@@ -134,7 +134,8 @@ public class SSH extends AsyncTask<String, Void, String> {
                     break;
 
                 case "SFTP_UpLoad":
-                    for (int count = 0; count < adInformations.size(); count++) {
+                    //for (int count = 0; count < adInformations.size(); count++) {
+                    System.out.println("Upload start");
                         channel = session.openChannel("sftp");
                         channel.connect();
                         channelSftp = (ChannelSftp) channel;
@@ -168,17 +169,22 @@ public class SSH extends AsyncTask<String, Void, String> {
                             @Override
                             public void end() {
                                 System.out.println("Upload End");
+
                             }
                         });
-                    }
+                   // }
                     break;
 
             }
         } catch (JSchException e) {
+            System.out.println("1");
             e.printStackTrace();
+
         } catch (IOException e) {
+            System.out.println("2");
             e.printStackTrace();
         } catch (SftpException e) {
+            System.out.println("3");
             e.printStackTrace();
         } finally {
             /*try {
@@ -193,6 +199,10 @@ public class SSH extends AsyncTask<String, Void, String> {
         }
         System.out.println("ssh finish");
 
-        return null;
+        return "finsh";
+    }
+
+    protected void onPostExecute(String result) {
+        super.onPostExecute(result);
     }
 }
