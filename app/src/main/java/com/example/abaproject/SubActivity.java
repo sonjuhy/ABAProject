@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONException;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -103,7 +101,7 @@ public class SubActivity extends AppCompatActivity {
                         searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
                         //station_place = "신월동";/////////--------------test용!
 
-                        handlerText.sendMessage(handlerText.obtainMessage());
+                        handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
 
                         System.out.println("time per 30's___station_place : " + station_place);
                     }
@@ -123,13 +121,11 @@ public class SubActivity extends AppCompatActivity {
                     Toast.makeText(SubActivity.this, "잘못된 입력입니다.", Toast.LENGTH_LONG).show();
                     finish();
                 }
-
             }
         };
 
-
-        Button button = findViewById(R.id.button2);
-        button.setOnClickListener(new View.OnClickListener() {
+        Button startButton = findViewById(R.id.startButton);
+        startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
@@ -143,8 +139,25 @@ public class SubActivity extends AppCompatActivity {
 
             }
         });
+        Button finshButton = findViewById(R.id.finshButton);
+        finshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-        //  timer.cancel();//타이머 종료
+
+                try {
+                    adScheduleManager.saveADInformaion(adList_Information);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                
+                timer.cancel();//타이머 종료
+                finish();;
+            }
+        });
+
     }
 
     public String sortingRouteNM(String RouteNM) {
@@ -160,8 +173,7 @@ public class SubActivity extends AppCompatActivity {
     public void searching_bus(BusInfo busInfo, ArrayList<AdList_Schedule> adList_schedule, int station_id)////////String 까지 받을수 있도록 수정
     {
         for (int i = 0; i < busInfo.BusInfo_Output_BusStationList().size(); i++) {
-            // System.out.println(station_id);
-            // System.out.println(busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID());
+
             if (busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID() == station_id) {
 
                 station_place = busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationPlace();
@@ -227,7 +239,7 @@ public class SubActivity extends AppCompatActivity {
                    //TextView textView4 = (TextView)findViewById(R.id.AdText);
                    //textView4.setText(this.adList_Information.get(i).getName());
                     ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
-                    ssh.execute("SSH", "command", this.adList_Information.get(i).getFileName());
+                    ssh.execute("SSH", "mplayer", this.adList_Information.get(i).getFileName());
                     //////////// play
                     try {
                         Thread.sleep(3000);
@@ -237,15 +249,22 @@ public class SubActivity extends AppCompatActivity {
                     ///////// play
                     System.out.println("play : " + this.adList_Information.get(i).getADnumber());
 
+                    this.adList_Information.get(i).addCount();
+                    if(adList_Information.get(i).getCount() >= adList_Information.get(i).getMaximumPlays())
+                    {
+                        playAdList.getAdList_informations(current_time).remove(Ad_List_time_count);
+                    }
 
                     Ad_List_time_count++;
                     if (playAdList.getAdList_informations(current_time).size() <= Ad_List_time_count) {
                         Ad_List_time_count = 0;
                     }
+
                     break;
-                    ///////////////test용 딜레이
+
                 }
             }
+
         }
     }
 
@@ -400,12 +419,18 @@ public class SubActivity extends AppCompatActivity {
             }
         }
     };
-    Handler handlerText = new Handler() {
+    Handler handlerLocalText = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             TextView textView = (TextView)findViewById(R.id.CurrentLocation);
             textView.setText(station_place);
         }
     };
-
+    Handler handlerADText = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            TextView textView = (TextView)findViewById(R.id.AdText);
+            textView.setText(station_place);
+        }
+    };
 }

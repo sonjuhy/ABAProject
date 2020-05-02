@@ -99,6 +99,14 @@ public class AdScheduleManager {
         return server_time;
     }
 
+    public void saveADInformaion(ArrayList<Ad_Information> adList_Information) throws JSONException, UnsupportedEncodingException {
+
+        for (int i = 0; i < adList_Information.size(); i++) {
+            Network_Access("Set_AD_Informaion", URLEncoder.encode(("count"), "UTF-8") + "=" + URLEncoder.encode(Integer.toString(adList_Information.get(i).getCount()), "UTF-8") +
+                                                        "&" + URLEncoder.encode("AD_number", "UTF-8") + "=" + URLEncoder.encode(Integer.toString(adList_Information.get(i).getADnumber()), "UTF-8"))
+            ;//Running Network
+        }
+    }
 
     public boolean Network_DataArrangement(String local) throws UnsupportedEncodingException { //testing
         //_param mean String[] _param
@@ -114,7 +122,7 @@ public class AdScheduleManager {
 
         local_information_storage();
         for (int i = 0; i < local.size(); i++) {
-            System.out.println("test :" +local.get(i));
+            System.out.println("test :" + local.get(i));
             Network_Access("Get_AD_information", URLEncoder.encode(("AD_local"), "UTF-8") + "=" + URLEncoder.encode(local.get(i), "UTF-8"));//Running Network
             Get_ADData(Network_data, local.get(i));//translate JSonData from Server to Java and Save Data
         }
@@ -152,7 +160,7 @@ public class AdScheduleManager {
                 MaxCount = Integer.parseInt(jsonObject1.getString("MaxCount"));
                 count = Integer.parseInt(jsonObject1.getString("count"));
                 ADname = jsonObject1.getString("ADname");
-                ADfile= jsonObject1.getString("ADfile");
+                ADfile = jsonObject1.getString("ADfile");
                 /////////fileName 추가
                 ////// 광고 정보
 
@@ -217,8 +225,7 @@ public class AdScheduleManager {
     }
 
     private void Get_file() {
-        for(int i=0;i<adList_Information.size();i++)
-        {
+        for (int i = 0; i < adList_Information.size(); i++) {
             //SSH ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298");
             //ssh.execute("SFTP", "folder_server", "folder_device" + adList_Information.get(i).getFileName());
         }

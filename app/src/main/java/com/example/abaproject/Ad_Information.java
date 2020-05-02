@@ -48,6 +48,9 @@ public class Ad_Information {
     public void setCount(int count) {
         this.count = count;
     }
+    public void addCount() {
+        this.count++ ;
+    }
     public void setTime(ArrayList<Integer> time) {
         this.time = time;
     }
