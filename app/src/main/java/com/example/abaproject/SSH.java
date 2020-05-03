@@ -108,14 +108,15 @@ public class SSH extends AsyncTask<String, Void, String> {
                     break;
 
                 case "SFTP_DownLoad":
-                   // for (int count = 0; count < adInformations.size(); count++) {
+                    for (int count = 0; count < adInformations.size(); count++) {
                         //System.out.println(adInformations.get(count).getFileName()+"~~~~~~~~~~~~~~~~~");
                         channel = session.openChannel("sftp");
                         channel.connect();
                         channelSftp = (ChannelSftp) channel;
                         channelSftp.cd(strings[1]);//"/var/www/ABA/g5/data/file/free/"
-                        inputStream = channelSftp.get("earthvideo.mp4");
-                    System.out.println("Download start");
+                        //inputStream = channelSftp.get("earthvideo.mp4");test
+                        inputStream = channelSftp.get(adInformations.get(count).getFileName());
+                        System.out.println("Download start : " + adInformations.get(count).getFileName() + adInformations.get(count).getADnumber());
 
                         //inputStream = channelSftp.get(adInformations.get(count).getFileName());//filename from server
 
@@ -123,18 +124,18 @@ public class SSH extends AsyncTask<String, Void, String> {
                         if(!file.exists())
                         {
                             file.createNewFile();
-                        }
-                        fileOutputStream = new FileOutputStream(file);*///ABAProject with filename
-                        fileOutputStream = new FileOutputStream(new File(strings[2] + "earthvideo.mp4"));
+                        }*/
+                        fileOutputStream = new FileOutputStream(strings[2] + adInformations.get(count).getFileName());//ABAProject with filename
+                        //fileOutputStream = new FileOutputStream(new File(strings[2] + "earthvideo.mp4"));//test
                         int i;
                         while ((i = inputStream.read()) != -1) {
                             fileOutputStream.write(i);
-                      //  }
+                        }
                     }
                     break;
 
                 case "SFTP_UpLoad":
-                    //for (int count = 0; count < adInformations.size(); count++) {
+                    for (int count = 0; count < adInformations.size(); count++) {
                     System.out.println("Upload start");
                         channel = session.openChannel("sftp");
                         channel.connect();
@@ -142,7 +143,7 @@ public class SSH extends AsyncTask<String, Void, String> {
 
                         //channelSftp.put(strings[2], strings[1], new SftpProgressMonitor() {
 
-                        channelSftp.put(strings[2] + "/earthvideo.mp4", "/home/ABA/earthvideo.mp4", new SftpProgressMonitor() {
+                        channelSftp.put(strings[2] + adInformations.get(count).getFileName(), "/home/ABA/" +adInformations.get(count).getFileName(), new SftpProgressMonitor() {
 
                             //strings[2] = device route and file name (ex : storage/0/ABAProject/video.mp4)
                             //strings[1] = server route and file name (ex : /var/www/ABA/g5/Allow_AD/video.mp4)
@@ -172,7 +173,7 @@ public class SSH extends AsyncTask<String, Void, String> {
 
                             }
                         });
-                   // }
+                    }
                     break;
 
             }
