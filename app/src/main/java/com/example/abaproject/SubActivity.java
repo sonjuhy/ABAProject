@@ -18,10 +18,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class SubActivity extends AppCompatActivity {
@@ -89,11 +94,50 @@ public class SubActivity extends AppCompatActivity {
             }
         }
 
+        final Runnable runnable = new Runnable() {
+            int result = 0;
+
+            @Override
+            public void run() {
+                try {
+                    busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
+
+                    if (AsyncTaskFinish) {
+
+                        //searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
+                        //station_place = "신월동";/////////--------------test용!
+
+                        handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
+
+                        // 현재시간을 msec 으로 구한다.
+                        long now = System.currentTimeMillis();
+                        // 현재시간을 date 변수에 저장한다.
+                        Date date = new Date(now);
+                        // 시간을 나타냇 포맷을 정한다 ( yyyy/MM/dd 같은 형태로 변형 가능 )
+                        SimpleDateFormat sdfNow = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                        // nowDate 변수에 값을 저장한다.
+                        String formatDate = sdfNow.format(date);
+                        System.out.println(formatDate);
+                    }
 
 
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (NumberFormatException e) {
+                    System.out.println("버스운행 종료");
+                    e.printStackTrace();
+                    station_place = null;
+                    Intent intent = new Intent(SubActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    Toast.makeText(SubActivity.this, "잘못된 입력입니다.", Toast.LENGTH_LONG).show();
+                    finish();
+                }
+            }
+        };
+        final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
-
-        //
 
         final Timer timer = new Timer();
         final TimerTask TT = new TimerTask() {
@@ -137,30 +181,16 @@ public class SubActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 try {
-
-                    timer.schedule(TT, 0, 2000); //Timer 실행
                     play_Ad(adList_schedule);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                ///////////////////
-                System.out.println("play : " + adList_Information.get(0).getADnumber());
-                ssh = new SSH("61.105.130.110", "pi", "admin", adList_Information, context);
-                try {
-                    String sshCheking = ssh.execute("SSH", "mplayer", folder_device + adList_Information.get(0).getFileName()).get();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+              ///////////////////
 
-                System.out.println("play : " + adList_Information.get(0).getADnumber());
-                ssh = new SSH("61.105.130.110", "pi", "admin", adList_Information, context);
-                ssh.execute("SSH", "mplayer", folder_device + "earthvideo.mp4");
-                System.out.println("play : " + adList_Information.get(0).getADnumber());
-                ssh = new SSH("61.105.130.110", "pi", "admin", adList_Information, context);
-                ssh.execute("SSH", "mplayer", folder_device + "earthvideo.mp4");
+                //timer.scheduleAtFixedRate(TT, 0, 2000); //Timer 실행
+                //service.scheduleAtFixedRate(runnable, 0, 5000, TimeUnit.MILLISECONDS);
+                //System.out.println("FINSH~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 //////////////////////////////
             }
         });
@@ -168,7 +198,6 @@ public class SubActivity extends AppCompatActivity {
         finshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
 
                 try {
                     adScheduleManager.saveADInformaion(adList_Information);
@@ -178,7 +207,7 @@ public class SubActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                timer.cancel();//타이머 종료
+
                 Intent intent = new Intent(SubActivity.this, MainActivity.class);
                 startActivity(intent);
             }
@@ -300,6 +329,8 @@ public class SubActivity extends AppCompatActivity {
                 }
             }
 
+            searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
+            handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
         }
     }
 
@@ -349,7 +380,7 @@ public class SubActivity extends AppCompatActivity {
 
 
             //if(!("".equals(filename))) {//Download AD video from server
-/*
+
             ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
             ssh.execute("SFTP_DownLoad", folder_server, folder_device);
 
