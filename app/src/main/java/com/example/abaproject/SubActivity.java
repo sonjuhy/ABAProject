@@ -50,6 +50,7 @@ public class SubActivity extends AppCompatActivity {
     private String folder_server = "/websites/ssl/www/ABA/data/file/Allow_AD";
     private String filename;
     private String[] command;
+
     private boolean AsyncTaskFinish = false;
     Context context;
 
@@ -87,7 +88,12 @@ public class SubActivity extends AppCompatActivity {
 
             }
         }
-        //  System.out.println(adList_Information.get(0).getStationPlace().get(0));
+
+
+
+
+
+        //
 
         final Timer timer = new Timer();
         final TimerTask TT = new TimerTask() {
@@ -112,12 +118,12 @@ public class SubActivity extends AppCompatActivity {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     System.out.println("버스운행 종료");
                     e.printStackTrace();
                     station_place = null;
                     timer.cancel();//타이머 종료
-                    Intent intent=new Intent(SubActivity.this,MainActivity.class);
+                    Intent intent = new Intent(SubActivity.this, MainActivity.class);
                     startActivity(intent);
                     Toast.makeText(SubActivity.this, "잘못된 입력입니다.", Toast.LENGTH_LONG).show();
                     finish();
@@ -129,16 +135,33 @@ public class SubActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                timer.schedule(TT, 0, 5000); //Timer 실행
-             /*   try {
 
-                    timer.schedule(TT, 0, 5000); //Timer 실행
+                try {
+
+                    timer.schedule(TT, 0, 2000); //Timer 실행
                     play_Ad(adList_schedule);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-*/
+                ///////////////////
+                System.out.println("play : " + adList_Information.get(0).getADnumber());
+                ssh = new SSH("61.105.130.110", "pi", "admin", adList_Information, context);
+                try {
+                    String sshCheking = ssh.execute("SSH", "mplayer", folder_device + adList_Information.get(0).getFileName()).get();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println("play : " + adList_Information.get(0).getADnumber());
+                ssh = new SSH("61.105.130.110", "pi", "admin", adList_Information, context);
+                ssh.execute("SSH", "mplayer", folder_device + "earthvideo.mp4");
+                System.out.println("play : " + adList_Information.get(0).getADnumber());
+                ssh = new SSH("61.105.130.110", "pi", "admin", adList_Information, context);
+                ssh.execute("SSH", "mplayer", folder_device + "earthvideo.mp4");
+                //////////////////////////////
             }
         });
         Button finshButton = findViewById(R.id.finshButton);
@@ -156,7 +179,7 @@ public class SubActivity extends AppCompatActivity {
                 }
 
                 timer.cancel();//타이머 종료
-                Intent intent=new Intent(SubActivity.this,MainActivity.class);
+                Intent intent = new Intent(SubActivity.this, MainActivity.class);
                 startActivity(intent);
             }
         });
@@ -193,9 +216,10 @@ public class SubActivity extends AppCompatActivity {
         int current_time = -999;
         int temp = 0;
         int start_time = adScheduleManager.getServer_time();
+        boolean running = false;
+        String sshCheking = null;
         AdList_Schedule playAdList = null;
-
-
+        folder_device = "/home/ABA/";
 
         while (station_place != null) {
             try {
@@ -232,34 +256,42 @@ public class SubActivity extends AppCompatActivity {
                         System.out.println("해당지역 시간 없음 ..........");
                         //TextView textView3 = (TextView)findViewById(R.id.AdText);
                         //textView3.setText("광고 없음");
+
                         Thread.sleep(10000);
                         continue;
                     } catch (InterruptedException e2) {
 
                     }
+
+
                 } else if (playAdList.getAdList_informations(current_time).get(Ad_List_time_count) == this.adList_Information.get(i).getADnumber()) {
                     //this.adList_Information.get(i).getAdvertisingpath();///동영상 경로 // 나중에 살리기
-                   //TextView textView4 = (TextView)findViewById(R.id.AdText);
-                   //textView4.setText(this.adList_Information.get(i).getName());
-                    ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
-                    ssh.execute("SSH", "mplayer", this.adList_Information.get(i).getFileName());
+                    //TextView textView4 = (TextView)findViewById(R.id.AdText);
+                    //textView4.setText(this.adList_Information.get(i).getName());
                     //////////// play
+                    System.out.println("play : " + this.adList_Information.get(i).getADnumber());
+                    ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
                     try {
-                        Thread.sleep(3000);
+                        sshCheking = ssh.execute("SSH", "mplayer", folder_device + this.adList_Information.get(i).getFileName()).get();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    while (running) {
+                        if (sshCheking.equals("finsh"))
+                            System.out.println("재생완료");
+                        running = false;
+                    }
                     ///////// play
-                    System.out.println("play : " + this.adList_Information.get(i).getADnumber());
 
-                    this.adList_Information.get(i).addCount();
-                    if(adList_Information.get(i).getCount() >= adList_Information.get(i).getMaximumPlays())
-                    {
+                    this.adList_Information.get(i).addCount();/// 재생횟수 증가
+                    if (adList_Information.get(i).getCount() >= adList_Information.get(i).getMaximumPlays()) {//// 재생횟수를 채운 광고 큐에서 제외
                         playAdList.getAdList_informations(current_time).remove(Ad_List_time_count);
                     }
 
                     Ad_List_time_count++;
-                    if (playAdList.getAdList_informations(current_time).size() <= Ad_List_time_count) {
+                    if (playAdList.getAdList_informations(current_time).size() <= Ad_List_time_count) {//// 큐처음으로 복귀
                         Ad_List_time_count = 0;
                     }
 
@@ -317,14 +349,14 @@ public class SubActivity extends AppCompatActivity {
 
 
             //if(!("".equals(filename))) {//Download AD video from server
-
+/*
             ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
             ssh.execute("SFTP_DownLoad", folder_server, folder_device);
 
 
-            sshup = new SSH("61.105.130.110","pi","admin", adList_Information, context);
+            sshup = new SSH("61.105.130.110", "pi", "admin", adList_Information, context);
             try {
-                threadcheck = sshup.execute("SFTP_UpLoad",folder_server,folder_device).get();
+                threadcheck = sshup.execute("SFTP_UpLoad", folder_server, folder_device).get();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
@@ -339,11 +371,11 @@ public class SubActivity extends AppCompatActivity {
             }
             */
             while (running) {
-                if (threadcheck.equals("finsh"))
+                //if (threadcheck.equals("finsh"))
+                if (true)
                     running = false;
                 handler.sendMessage(handler.obtainMessage());
             }
-
 
 
             System.out.println("Thread run is over");
@@ -428,14 +460,14 @@ public class SubActivity extends AppCompatActivity {
     Handler handlerLocalText = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            TextView textView = (TextView)findViewById(R.id.CurrentLocation);
+            TextView textView = (TextView) findViewById(R.id.CurrentLocation);
             textView.setText(station_place);
         }
     };
     Handler handlerADText = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            TextView textView = (TextView)findViewById(R.id.AdText);
+            TextView textView = (TextView) findViewById(R.id.AdText);
             textView.setText(station_place);
         }
     };

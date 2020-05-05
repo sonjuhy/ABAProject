@@ -71,7 +71,9 @@ public class SSH extends AsyncTask<String, Void, String> {
                     channelExec = (ChannelExec) channel;
                     channelExec.setPty(true);
                     // if (count == 0) {
+                    System.out.println("export DISPLAY=:0 && " + strings[1] + " " + strings[2]);
                     channelExec.setCommand("export DISPLAY=:0 && " + strings[1] + " " + strings[2]);//command
+                    //channelExec.setCommand("ls");//command
                     //   } else {
                     //       channelExec.setCommand(strings[1] + " " + strings[2]);//command
                     //  }
@@ -135,7 +137,8 @@ public class SSH extends AsyncTask<String, Void, String> {
                     break;
 
                 case "SFTP_UpLoad":
-                    for (int count = 0; count < adInformations.size(); count++) {
+                   // for (int count = 0; count < adInformations.size(); count++) {
+                        for (int count = 0; count < 0; count++) {///test
                     System.out.println("Upload start");
                         channel = session.openChannel("sftp");
                         channel.connect();
