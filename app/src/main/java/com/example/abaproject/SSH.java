@@ -137,8 +137,8 @@ public class SSH extends AsyncTask<String, Void, String> {
                     break;
 
                 case "SFTP_UpLoad":
-                   // for (int count = 0; count < adInformations.size(); count++) {
-                        for (int count = 0; count < 0; count++) {///test
+                    for (int count = 0; count < adInformations.size(); count++) {
+                   //     for (int count = 0; count < 0; count++) {///test
                     System.out.println("Upload start");
                         channel = session.openChannel("sftp");
                         channel.connect();

@@ -104,8 +104,8 @@ public class SubActivity extends AppCompatActivity {
 
                     if (AsyncTaskFinish) {
 
-                        //searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
-                        //station_place = "신월동";/////////--------------test용!
+                        searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
+                        station_place = "신월동";/////////--------------test용!
 
                         handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
 
@@ -179,6 +179,8 @@ public class SubActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                searching_bus(busInfo, adList_schedule, Integer.parseInt(busStop));
+                handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
 
                 try {
                     play_Ad(adList_schedule);
@@ -299,9 +301,9 @@ public class SubActivity extends AppCompatActivity {
                     //textView4.setText(this.adList_Information.get(i).getName());
                     //////////// play
                     System.out.println("play : " + this.adList_Information.get(i).getADnumber());
-                    ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
+                    ssh = new SSH("169.254.204.215", "pi", "admin", adList_Information, context);
                     try {
-                        sshCheking = ssh.execute("SSH", "mplayer", folder_device + this.adList_Information.get(i).getFileName()).get();
+                        sshCheking = ssh.execute("SSH", "mplayer -zoom -x 800 -y 400 ", folder_device + this.adList_Information.get(i).getFileName()).get();
                     } catch (ExecutionException e) {
                         e.printStackTrace();
                     } catch (InterruptedException e) {
@@ -381,11 +383,11 @@ public class SubActivity extends AppCompatActivity {
 
             //if(!("".equals(filename))) {//Download AD video from server
 
-            ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
-            ssh.execute("SFTP_DownLoad", folder_server, folder_device);
+            //ssh = new SSH("sonjuhy.iptime.org", "sonjuhy", "son278298", adList_Information, context);
+           // ssh.execute("SFTP_DownLoad", folder_server, folder_device);
 
 
-            sshup = new SSH("61.105.130.110", "pi", "admin", adList_Information, context);
+            sshup = new SSH("169.254.204.215", "pi", "admin", adList_Information, context);
             try {
                 threadcheck = sshup.execute("SFTP_UpLoad", folder_server, folder_device).get();
             } catch (ExecutionException e) {
@@ -402,11 +404,12 @@ public class SubActivity extends AppCompatActivity {
             }
             */
             while (running) {
-                //if (threadcheck.equals("finsh"))
-                if (true)
+                if (threadcheck.equals("finsh"))
+                    // if (true)
                     running = false;
-                handler.sendMessage(handler.obtainMessage());
             }
+            handler.sendMessage(handler.obtainMessage());
+
 
 
             System.out.println("Thread run is over");
