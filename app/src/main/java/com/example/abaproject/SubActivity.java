@@ -235,7 +235,9 @@ public class SubActivity extends AppCompatActivity {
                     textView4.setText(this.ad_informationArrayList.get(i).getName());
                     //////////// play
                     System.out.println("play : " + this.ad_informationArrayList.get(i).getADnumber());
-
+                    ssh = new SSH(serverHostName, "pi", "admin", ad_informationArrayList, context);
+                    ssh.execute("SSH", folder_server, folder_device);
+                    
                     ///////// play
 
                     this.ad_informationArrayList.get(i).addCount();/// 재생횟수 증가
