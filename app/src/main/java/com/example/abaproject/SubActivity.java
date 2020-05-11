@@ -91,27 +91,32 @@ public class SubActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
-                    searching_bus(busInfo, adList_scheduleArrayList, Integer.parseInt(busStop));
-                    handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
 
-                    play_Ad(adList_scheduleArrayList);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (NumberFormatException e) {
-                    System.out.println("버스운행 종료");
-                    e.printStackTrace();
-                    station_place = null;
-                    Intent intent = new Intent(SubActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    Toast.makeText(SubActivity.this, "잘못된 입력입니다.", Toast.LENGTH_LONG).show();
-                    finish();
-                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
+                            searching_bus(busInfo, adList_scheduleArrayList, Integer.parseInt(busStop));
+                            handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
+
+                            play_Ad(adList_scheduleArrayList);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (NumberFormatException e) {
+                            System.out.println("버스운행 종료");
+                            e.printStackTrace();
+                            station_place = null;
+                            Intent intent = new Intent(SubActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+                }).start();
             }
         });
         Button finshButton = findViewById(R.id.finshButton);
@@ -152,8 +157,6 @@ public class SubActivity extends AppCompatActivity {
             if (busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationID() == station_id) {
 
                 station_place = busInfo.BusInfo_Output_BusStationList().get(i).BusStation_Output_StationPlace();
-                TextView textView = (TextView) findViewById(R.id.CurrentLocation);
-                textView.setText(station_place);
                 System.out.println(station_place);
                 return;
             }
@@ -185,7 +188,6 @@ public class SubActivity extends AppCompatActivity {
                 try {
                     System.out.println("해당지역 광고 없음 ..........");
                     TextView textView2 = (TextView) findViewById(R.id.AdText);
-                    textView2.setText("광고 없음");
                     Thread.sleep(20000);
                     continue;
                 } catch (InterruptedException e2) {
@@ -212,7 +214,6 @@ public class SubActivity extends AppCompatActivity {
                     try {
                         System.out.println("해당지역 시간 없음 ..........");
                         TextView textView3 = (TextView) findViewById(R.id.AdText);
-                        textView3.setText("광고 없음");
 
                         Thread.sleep(20000);
                         break;
@@ -230,14 +231,18 @@ public class SubActivity extends AppCompatActivity {
                         }
                         break;
                     }
-
-                    TextView textView4 = (TextView) findViewById(R.id.AdText);
-                    textView4.setText(this.ad_informationArrayList.get(i).getName());
                     //////////// play
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString("ADname", this.ad_informationArrayList.get(i).getName());
+                    Message message = handlerADText.obtainMessage();
+                    message.setData(bundle);
+                    handlerADText.sendMessage(message);
+
                     System.out.println("play : " + this.ad_informationArrayList.get(i).getADnumber());
                     ssh = new SSH(serverHostName, "pi", "admin", ad_informationArrayList, context);
                     ssh.execute("SSH", folder_server, folder_device);
-                    
+
                     ///////// play
 
                     this.ad_informationArrayList.get(i).addCount();/// 재생횟수 증가
@@ -421,8 +426,11 @@ public class SubActivity extends AppCompatActivity {
     Handler handlerADText = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+
+            Bundle bundle = msg.getData();
+            String ADname = bundle.getString("ADname");
             TextView textView = (TextView) findViewById(R.id.AdText);
-            textView.setText(station_place);
+            textView.setText(ADname);
         }
     };
 }
