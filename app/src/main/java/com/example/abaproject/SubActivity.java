@@ -241,8 +241,8 @@ public class SubActivity extends AppCompatActivity {
 
                     System.out.println("play : " + this.ad_informationArrayList.get(i).getADnumber());
                     ssh = new SSH(serverHostName, "pi", "admin", ad_informationArrayList, context);
-                    ssh.execute("SSH", folder_server, folder_device);
-
+                    //ssh.execute("SSH", "omxplyaer", "/home/ABA/" + this.ad_informationArrayList.get(i).getFileName());
+                    ssh.execute("SSH", "omxplayer", folder_device + ad_informationArrayList.get(i).getFileName());
                     ///////// play
 
                     this.ad_informationArrayList.get(i).addCount();/// 재생횟수 증가
