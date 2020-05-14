@@ -63,13 +63,23 @@ public class SubActivity extends AppCompatActivity {
         BusName = intent.getExtras().getString("BusName");///차량번호
         folder_device = intent.getExtras().getString("fileRoute");//어플(동영상다운로드용) 폴더
 
-        busInfo = new BusInfo();
-        busInfo.BusInfo_Input(0, Integer.parseInt(RouteNM), BusName, null);
+        try {
 
-        progressDialog = ProgressDialog.show(SubActivity.this, "Loading...", "Wait Please");
-        backgroundThread = new BackgroundThread();
-        backgroundThread.setRunning(true);
+            busInfo = new BusInfo();
+            busInfo.BusInfo_Input(0, Integer.parseInt(RouteNM), BusName, null);
+            progressDialog = ProgressDialog.show(SubActivity.this, "Loading...", "Wait Please");
+            backgroundThread = new BackgroundThread();
+            backgroundThread.setRunning(true);
 
+
+        } catch (NumberFormatException e) {
+            handlerToastManager("잘못된 입력입니다.");
+            e.printStackTrace();
+            station_place = null;
+            Intent aI = new Intent(SubActivity.this, MainActivity.class);
+            startActivity(aI);
+            finish();
+        }
         System.out.println("background end");
 
 
@@ -173,101 +183,110 @@ public class SubActivity extends AppCompatActivity {
 
         String sshCheking = null;
         AdList_Schedule playAdList = null;
-        folder_device = "/home/ABA/";
-
-        while (station_place != null) {
 
 
-            busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
-            searching_bus(busInfo, adList_scheduleList, Integer.parseInt(busStop));
-            handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
+        try {
+            while (station_place != null) {
 
 
-            try {
-                playAdList = adList_scheduleList.get(searchLocal_in_adList());
-            } catch (ArrayIndexOutOfBoundsException e) {
+                busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
+                searching_bus(busInfo, adList_scheduleList, Integer.parseInt(busStop));
+                handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
+
+
                 try {
-                    System.out.println("해당지역 광고 없음 ..........");
-
-                    handlerADTextManager("광고 없음");
-
-                    Thread.sleep(20000);
-                    continue;
-                } catch (InterruptedException e2) {
-
-                }
-            }
-
-            ///장소확인
-            if (!playAdList.getStationPlace().equals(station_place)) {
-                playAdList = adList_scheduleList.get(searchLocal_in_adList());
-            }
-            ///시간확인
-            temp = (adScheduleManager.getServer_time() - start_time);
-            if (current_time != temp) {
-                current_time = temp;
-                Ad_List_time_count = 0;
-                System.out.println("current_time : " + current_time);
-            }
-
-            ////// 재생
-            for (int i = 0; i < this.ad_informationArrayList.size(); i++) {
-                //////재생되어야할 광고번호 광고 리스트에서찾기
-                if (playAdList.getAdList_informations(current_time).size() <= 0) {
+                    playAdList = adList_scheduleList.get(searchLocal_in_adList());
+                } catch (ArrayIndexOutOfBoundsException e) {
                     try {
-                        System.out.println("해당지역 시간 없음 ..........");
-
+                        System.out.println("해당지역 광고 없음 ..........");
 
                         handlerADTextManager("광고 없음");
 
                         Thread.sleep(20000);
-                        break;
+                        continue;
                     } catch (InterruptedException e2) {
 
                     }
+                }
+
+                ///장소확인
+                if (!playAdList.getStationPlace().equals(station_place)) {
+                    playAdList = adList_scheduleList.get(searchLocal_in_adList());
+                }
+                ///시간확인
+                temp = (adScheduleManager.getServer_time() - start_time);
+                if (current_time != temp) {
+                    current_time = temp;
+                    Ad_List_time_count = 0;
+                    System.out.println("current_time : " + current_time);
+                }
+
+                ////// 재생
+                for (int i = 0; i < this.ad_informationArrayList.size(); i++) {
+                    //////재생되어야할 광고번호 광고 리스트에서찾기
+                    if (playAdList.getAdList_informations(current_time).size() <= 0) {
+                        try {
+                            System.out.println("해당지역 시간 없음 ..........");
 
 
-                } else if (playAdList.getAdList_informations(current_time).get(Ad_List_time_count) == this.ad_informationArrayList.get(i).getADnumber()) {
+                            handlerADTextManager("광고 없음");
 
-                    if (ad_informationArrayList.get(i).getCount() >= ad_informationArrayList.get(i).getMaximumPlays()) {
+                            Thread.sleep(20000);
+                            break;
+                        } catch (InterruptedException e2) {
+
+                        }
+
+
+                    } else if (playAdList.getAdList_informations(current_time).get(Ad_List_time_count) == this.ad_informationArrayList.get(i).getADnumber()) {
+
+                        if (ad_informationArrayList.get(i).getCount() >= ad_informationArrayList.get(i).getMaximumPlays()) {
+                            Ad_List_time_count++;
+                            if (playAdList.getAdList_informations(current_time).size() <= Ad_List_time_count) {//// 큐처음으로 복귀
+                                Ad_List_time_count = 0;
+                            }
+
+
+                            handlerADTextManager("광고 없음");
+                            Thread.sleep(20000);
+
+
+                            break;
+                        }
+                        //////////// play
+
+                        handlerADTextManager(this.ad_informationArrayList.get(i).getName());
+
+                        System.out.println("play : " + this.ad_informationArrayList.get(i).getADnumber());
+                        ssh = new SSH(PIHostName, "pi", "admin", ad_informationArrayList, context);
+                        ssh.execute("SSH", "omxplyaer", "/home/ABA/" + this.ad_informationArrayList.get(i).getFileName());
+
+                        ///////// play
+
+                        this.ad_informationArrayList.get(i).addCount();/// 재생횟수 증가
+                        if (ad_informationArrayList.get(i).getCount() >= ad_informationArrayList.get(i).getMaximumPlays()) {//// 재생횟수를 채운 광고 큐에서 제외
+                            playAdList.getAdList_informations(current_time).remove(Ad_List_time_count);
+                        }
+
                         Ad_List_time_count++;
                         if (playAdList.getAdList_informations(current_time).size() <= Ad_List_time_count) {//// 큐처음으로 복귀
                             Ad_List_time_count = 0;
                         }
 
-
-                        handlerADTextManager("광고 없음");
-                        Thread.sleep(20000);
-
-
+                        busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
+                        searching_bus(busInfo, adList_scheduleList, Integer.parseInt(busStop));
+                        handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
                         break;
                     }
-                    //////////// play
-
-                    handlerADTextManager(this.ad_informationArrayList.get(i).getName());
-
-                    System.out.println("play : " + this.ad_informationArrayList.get(i).getADnumber());
-                    ssh = new SSH(PIHostName, "pi", "admin", ad_informationArrayList, context);
-                    ssh.execute("SSH", "omxplyaer", "/home/ABA/" + this.ad_informationArrayList.get(i).getFileName());
-                    ssh.execute("SSH", "omxplayer", folder_device + ad_informationArrayList.get(i).getFileName());
-                    ///////// play
-
-                    this.ad_informationArrayList.get(i).addCount();/// 재생횟수 증가
-                    if (ad_informationArrayList.get(i).getCount() >= ad_informationArrayList.get(i).getMaximumPlays()) {//// 재생횟수를 채운 광고 큐에서 제외
-                        playAdList.getAdList_informations(current_time).remove(Ad_List_time_count);
-                    }
-
-                    Ad_List_time_count++;
-                    if (playAdList.getAdList_informations(current_time).size() <= Ad_List_time_count) {//// 큐처음으로 복귀
-                        Ad_List_time_count = 0;
-                    }
-
-                    busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
-                    searching_bus(busInfo, adList_scheduleList, Integer.parseInt(busStop));
-                    handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
-                    break;
                 }
             }
+        } catch (NumberFormatException e) {
+            System.out.println("버스운행 종료");
+            e.printStackTrace();
+            station_place = null;
+            Intent intent = new Intent(SubActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
         }
     }
 
@@ -292,29 +311,36 @@ public class SubActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            super.run();
-            Log.v("background thread", "run() is start");
-            String filename = null;
-            BusRoute_Load(RouteNM);
-            System.out.println("BusRoute Load End");
-            BusLocation_Load();
-            System.out.println("BusLocation Load End");
-            Station_Load();
-            System.out.println("Station Load End");
-            StationPlace_Load();
-            System.out.println("Station Place End");
-            /*
-             * write here about load AD info list
-             * */
-
-            adScheduleManager = new AdScheduleManager(busInfo, adList_scheduleArrayList, ad_informationArrayList);
             try {
+                super.run();
+                Log.v("background thread", "run() is start");
+                String filename = null;
+                BusRoute_Load(RouteNM);
+                System.out.println("BusRoute Load End");
+                BusLocation_Load();
+                System.out.println("BusLocation Load End");
+                Station_Load();
+                System.out.println("Station Load End");
+                StationPlace_Load();
+                System.out.println("Station Place End");
+                /*
+                 * write here about load AD info list
+                 * */
+
+                adScheduleManager = new AdScheduleManager(busInfo, adList_scheduleArrayList, ad_informationArrayList);
+
                 adScheduleManager.Network_DataArrangement();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+            } catch (NullPointerException e) {
+
+                handlerToastManager("잘못된 입력입니다.");
+                e.printStackTrace();
+                station_place = null;
+                Intent intent = new Intent(SubActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
             }
-
-
 
 
             ssh = new SSH(serverHostName, "sonjuhy", "son278298", ad_informationArrayList, context);
@@ -408,6 +434,16 @@ public class SubActivity extends AppCompatActivity {
 
     }
 
+    public void handlerToastManager(String toast) {
+
+        Bundle bundle;
+        bundle = new Bundle();
+        bundle.putString("Toast", toast);
+        Message message = handlerToast.obtainMessage();
+        message.setData(bundle);
+        handlerToast.sendMessage(message);
+
+    }
 
     Handler handler = new Handler() {
         @Override
@@ -445,4 +481,15 @@ public class SubActivity extends AppCompatActivity {
             textView.setText(ADname);
         }
     };
+
+    Handler handlerToast = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+
+            Bundle bundle = msg.getData();
+            String toast = bundle.getString("Toast");
+            Toast.makeText(context, toast, Toast.LENGTH_LONG).show();
+        }
+    };
+
 }
