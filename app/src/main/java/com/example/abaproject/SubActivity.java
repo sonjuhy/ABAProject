@@ -133,8 +133,8 @@ public class SubActivity extends AppCompatActivity {
                 }
 
 
-                //Intent intent = new Intent(SubActivity.this, MainActivity.class);
-                //startActivity(intent);
+                Intent intent = new Intent(SubActivity.this, MainActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -170,6 +170,7 @@ public class SubActivity extends AppCompatActivity {
         int temp = 0;
         int start_time = adScheduleManager.getServer_time();
         boolean running = false;
+
         String sshCheking = null;
         AdList_Schedule playAdList = null;
         folder_device = "/home/ABA/";
@@ -177,17 +178,19 @@ public class SubActivity extends AppCompatActivity {
         while (station_place != null) {
 
 
-            //  busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
-            //  searching_bus(busInfo, adList_scheduleList, Integer.parseInt(busStop));
-            // handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
-            station_place = "북면";
+            busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
+            searching_bus(busInfo, adList_scheduleList, Integer.parseInt(busStop));
+            handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
+
 
             try {
                 playAdList = adList_scheduleList.get(searchLocal_in_adList());
             } catch (ArrayIndexOutOfBoundsException e) {
                 try {
                     System.out.println("해당지역 광고 없음 ..........");
-                    TextView textView2 = (TextView) findViewById(R.id.AdText);
+
+                    handlerADTextManager("광고 없음");
+
                     Thread.sleep(20000);
                     continue;
                 } catch (InterruptedException e2) {
@@ -213,7 +216,9 @@ public class SubActivity extends AppCompatActivity {
                 if (playAdList.getAdList_informations(current_time).size() <= 0) {
                     try {
                         System.out.println("해당지역 시간 없음 ..........");
-                        TextView textView3 = (TextView) findViewById(R.id.AdText);
+
+
+                        handlerADTextManager("광고 없음");
 
                         Thread.sleep(20000);
                         break;
@@ -229,20 +234,22 @@ public class SubActivity extends AppCompatActivity {
                         if (playAdList.getAdList_informations(current_time).size() <= Ad_List_time_count) {//// 큐처음으로 복귀
                             Ad_List_time_count = 0;
                         }
+
+
+                        handlerADTextManager("광고 없음");
+                        Thread.sleep(20000);
+
+
                         break;
                     }
                     //////////// play
 
-                    Bundle bundle = new Bundle();
-                    bundle.putString("ADname", this.ad_informationArrayList.get(i).getName());
-                    Message message = handlerADText.obtainMessage();
-                    message.setData(bundle);
-                    handlerADText.sendMessage(message);
+                    handlerADTextManager(this.ad_informationArrayList.get(i).getName());
 
                     System.out.println("play : " + this.ad_informationArrayList.get(i).getADnumber());
                     ssh = new SSH(PIHostName, "pi", "admin", ad_informationArrayList, context);
                     ssh.execute("SSH", "omxplyaer", "/home/ABA/" + this.ad_informationArrayList.get(i).getFileName());
-                    //ssh.execute("SSH", "omxplayer", folder_device + ad_informationArrayList.get(i).getFileName());
+                    ssh.execute("SSH", "omxplayer", folder_device + ad_informationArrayList.get(i).getFileName());
                     ///////// play
 
                     this.ad_informationArrayList.get(i).addCount();/// 재생횟수 증가
@@ -308,7 +315,7 @@ public class SubActivity extends AppCompatActivity {
             }
 
 
-            //if(!("".equals(filename))) {//Download AD video from server
+
 
             ssh = new SSH(serverHostName, "sonjuhy", "son278298", ad_informationArrayList, context);
             ssh.execute("SFTP_DownLoad", folder_server, folder_device);
@@ -323,13 +330,6 @@ public class SubActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            //}
-            /* use here when after make AD info list
-            if(!("".equals(filename))){//Send Command to Raspberry Pi(ex : send video, show video etc)
-                ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298");
-                ssh.execute("SSH", command[0]);
-            }
-*/
             while (running) {
                 if (threadcheck.equals("finsh"))
                     // if (true)
@@ -396,6 +396,18 @@ public class SubActivity extends AppCompatActivity {
         }
 
     }
+
+    public void handlerADTextManager(String AD) {
+
+        Bundle bundle;
+        bundle = new Bundle();
+        bundle.putString("ADname", AD);
+        Message message = handlerADText.obtainMessage();
+        message.setData(bundle);
+        handlerADText.sendMessage(message);
+
+    }
+
 
     Handler handler = new Handler() {
         @Override
