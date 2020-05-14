@@ -46,7 +46,7 @@ public class SubActivity extends AppCompatActivity {
     private String folder_device;
     private String folder_server = "/websites/ssl/www/ABA/data/file/Allow_AD";
     private String serverHostName = "sonjuhy.iptime.org";
-    private String PIHostName = "162.254.205.214";
+    private String PIHostName = "192.168.0.23";
     private String[] command;
 
     private boolean AsyncTaskFinish = false;
@@ -187,13 +187,9 @@ public class SubActivity extends AppCompatActivity {
 
         try {
             while (station_place != null) {
-
-
                 busStop = new XmlParsing().execute("BusPosition", sortingRouteNM(RouteNM), BusName).get();
                 searching_bus(busInfo, adList_scheduleList, Integer.parseInt(busStop));
                 handlerLocalText.sendMessage(handlerLocalText.obtainMessage());
-
-
                 try {
                     playAdList = adList_scheduleList.get(searchLocal_in_adList());
                 } catch (ArrayIndexOutOfBoundsException e) {
@@ -239,14 +235,11 @@ public class SubActivity extends AppCompatActivity {
 
 
                     } else if (playAdList.getAdList_informations(current_time).get(Ad_List_time_count) == this.ad_informationArrayList.get(i).getADnumber()) {
-
                         if (ad_informationArrayList.get(i).getCount() >= ad_informationArrayList.get(i).getMaximumPlays()) {
                             Ad_List_time_count++;
                             if (playAdList.getAdList_informations(current_time).size() <= Ad_List_time_count) {//// 큐처음으로 복귀
                                 Ad_List_time_count = 0;
                             }
-
-
                             handlerADTextManager("광고 없음");
                             Thread.sleep(20000);
 
@@ -258,7 +251,7 @@ public class SubActivity extends AppCompatActivity {
                         handlerADTextManager(this.ad_informationArrayList.get(i).getName());
 
                         System.out.println("play : " + this.ad_informationArrayList.get(i).getADnumber());
-                        ssh = new SSH(PIHostName, "pi", "admin", ad_informationArrayList, context);
+                        ssh = new SSH(PIHostName, "pi", "@7gudrnjs", ad_informationArrayList, context);
                         ssh.execute("SSH", "omxplyaer", "/home/ABA/" + this.ad_informationArrayList.get(i).getFileName());
 
                         ///////// play
@@ -343,11 +336,14 @@ public class SubActivity extends AppCompatActivity {
             }
 
 
+
+            //if(!("".equals(filename))) {//Download AD video from server
+
             ssh = new SSH(serverHostName, "sonjuhy", "son278298", ad_informationArrayList, context);
             ssh.execute("SFTP_DownLoad", folder_server, folder_device);
 
 
-            sshup = new SSH(PIHostName, "pi", "admin", ad_informationArrayList, context);
+            sshup = new SSH(PIHostName, "pi", "@7gudrnjs", ad_informationArrayList, context);
             try {
                 threadcheck = sshup.execute("SFTP_UpLoad", folder_server, folder_device).get();
             } catch (ExecutionException e) {
@@ -355,6 +351,11 @@ public class SubActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            /* use here when after make AD info list
+            if(!("".equals(filename))){//Send Command to Raspberry Pi(ex : send video, show video etc)
+                ssh = new SSH("sonjuhy.iptime.org","sonjuhy","son278298");
+                ssh.execute("SSH", command[0]);
+            }*/
 
             while (running) {
                 if (threadcheck.equals("finsh"))

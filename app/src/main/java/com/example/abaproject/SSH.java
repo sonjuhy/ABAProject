@@ -73,6 +73,7 @@ public class SSH extends AsyncTask<String, Void, String> {
                     // if (count == 0) {
                     System.out.println("export DISPLAY=:0 && " + strings[1] + " " + strings[2]);
                     channelExec.setCommand("export DISPLAY=:0 && " + strings[1] + " " + strings[2]);//command
+                    //channelExec.setCommand(strings[1] + " " + strings[2]);//command
                     //channelExec.setCommand("ls");//command
                     //   } else {
                     //       channelExec.setCommand(strings[1] + " " + strings[2]);//command
@@ -181,25 +182,44 @@ public class SSH extends AsyncTask<String, Void, String> {
 
             }
         } catch (JSchException e) {
-            System.out.println("1");
+            System.out.println("JSchException : code 1");
             e.printStackTrace();
 
         } catch (IOException e) {
-            System.out.println("2");
+            System.out.println("IOException : code 2");
             e.printStackTrace();
         } catch (SftpException e) {
-            System.out.println("3");
+            System.out.println("SftpException : code 3");
             e.printStackTrace();
         } finally {
-            /*try {
+            try {
+                /*switch (strings[0]){
+                    case "SSH":
+                        if(inputStream != null)
+                            inputStream.close();
+                        break;
+                    case "SFTP_DownLoad":
+                        if(inputStream != null)
+                            inputStream.close();
+                        if(fileOutputStream != null)
+                            fileOutputStream.close();
+                        channelSftp.disconnect();
+                        break;
+                    case "SFTP_UpLoad":
+                        //OutputStream.close();
+                        channelSftp.disconnect();
+                        break;
+                }*/
+                if(channel != null)
+                    channel.disconnect();
                // fileOutputStream.close();
-                inputStream.close();
+                //inputStream.close();
                 if("SFTP_UpLoad".equals(strings[1])){
                     OutputStream.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            }*/
+            }
         }
         System.out.println("ssh finish");
 
